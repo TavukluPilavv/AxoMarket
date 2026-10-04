@@ -15,7 +15,12 @@ import java.util.List;
 
 public class MarketListener implements Listener {
 
-    private final Economy econ = Main.getEconomy();
+    private final Main plugin;
+
+    // Main.java'dan gelen 'this' (plugin) parametresini kabul eden constructor
+    public MarketListener(Main plugin) {
+        this.plugin = plugin;
+    }
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
@@ -69,7 +74,8 @@ public class MarketListener implements Listener {
         int amountToBuy = (event.getClick() == ClickType.RIGHT) ? 64 : 1;
         double totalPrice = basePrice * amountToBuy;
 
-        if (econ.getBalance(player) < totalPrice) {
+        Economy econ = Main.getEconomy();
+        if (econ == null || econ.getBalance(player) < totalPrice) {
             player.sendMessage(ChatColor.RED + "Yetersiz Bakiye! Gerekli: " + totalPrice + " TL");
             return;
         }
