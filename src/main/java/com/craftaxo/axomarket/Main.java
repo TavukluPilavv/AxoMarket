@@ -4,7 +4,6 @@ import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
@@ -26,7 +25,7 @@ import java.util.*;
 public class Main extends JavaPlugin implements Listener {
 
     private static Economy econ = null;
-    // Seçili eşyayı ve miktarı hafızada tutma map'leri
+    
     private final Map<UUID, ItemStack> selectedItem = new HashMap<>();
     private final Map<UUID, Integer> selectedAmount = new HashMap<>();
     private final Map<UUID, Double> selectedUnitPrice = new HashMap<>();
@@ -50,6 +49,10 @@ public class Main extends JavaPlugin implements Listener {
         return econ != null;
     }
 
+    public static Economy getEconomy() {
+        return econ;
+    }
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (command.getName().equalsIgnoreCase("market") && sender instanceof Player) {
@@ -64,10 +67,8 @@ public class Main extends JavaPlugin implements Listener {
     public void openMainMenu(Player player) {
         Inventory gui = Bukkit.createInventory(null, 36, ChatColor.DARK_GRAY + "Sunucu Magazasi");
 
-        // Sağ alt kapatma
         gui.setItem(31, createGuiItem(Material.BARRIER, ChatColor.RED + "Kapat", ""));
 
-        // Kategoriler
         gui.setItem(10, createGuiItem(Material.NETHERITE_SWORD, ChatColor.GOLD + "Kiliclar", ChatColor.GRAY + "Kilic kategorisini acmak icin tikla."));
         gui.setItem(11, createGuiItem(Material.NETHERITE_CHESTPLATE, ChatColor.GOLD + "Setler", ChatColor.GRAY + "Set kategorisini acmak icin tikla."));
         gui.setItem(12, createGuiItem(Material.NETHERITE_PICKAXE, ChatColor.GOLD + "Kazmalar", ChatColor.GRAY + "Kazma kategorisini acmak icin tikla."));
@@ -100,7 +101,6 @@ public class Main extends JavaPlugin implements Listener {
         gui.setItem(12, createMarketItem(Material.NETHERITE_LEGGINGS, ChatColor.GREEN + "Netherite Pantolon (P4 Kır3 Onarım)", 10000, setEnchants));
         gui.setItem(13, createMarketItem(Material.NETHERITE_BOOTS, ChatColor.GREEN + "Netherite Çizme (P4 Kır3 Onarım)", 10000, setEnchants));
 
-        // Şablonlar
         gui.setItem(15, createMarketItem(Material.NETHERITE_UPGRADE_SMITHING_TEMPLATE, ChatColor.GOLD + "Netherite Yükseltme Şablonu", 15000, null));
 
         gui.setItem(31, createGuiItem(Material.BARRIER, ChatColor.RED + "Kapat", ""));
@@ -133,7 +133,7 @@ public class Main extends JavaPlugin implements Listener {
         gui.setItem(14, createStackMarketItem(Material.REDSTONE, "Kızıltaş", 100, 64));
         gui.setItem(15, createStackMarketItem(Material.PISTON, "Piston", 100, 64));
         gui.setItem(16, createStackMarketItem(Material.STICKY_PISTON, "Yapışkan Piston", 100, 64));
-        gui.setItem(19, createStackMarketItem(Material.LEVER, "Şalter", 320, 64)); // Taneli 5tl -> 64x5 = 320
+        gui.setItem(19, createStackMarketItem(Material.LEVER, "Şalter", 320, 64));
         gui.setItem(20, createStackMarketItem(Material.WATER_BUCKET, "Su Kovası", 20, 1));
 
         gui.setItem(31, createGuiItem(Material.BARRIER, ChatColor.RED + "Kapat", ""));
@@ -143,7 +143,6 @@ public class Main extends JavaPlugin implements Listener {
     public void openBlockMenu(Player player) {
         Inventory gui = Bukkit.createInventory(null, 54, ChatColor.DARK_GRAY + "Blok Kategorisi");
 
-        // Tüm Betonlar (64 Tane - 100 TL)
         Material[] concretes = {
                 Material.WHITE_CONCRETE, Material.ORANGE_CONCRETE, Material.MAGENTA_CONCRETE, Material.LIGHT_BLUE_CONCRETE,
                 Material.YELLOW_CONCRETE, Material.LIME_CONCRETE, Material.PINK_CONCRETE, Material.GRAY_CONCRETE,
@@ -155,11 +154,9 @@ public class Main extends JavaPlugin implements Listener {
             gui.setItem(slot++, createStackMarketItem(c, getCleanName(c.name()), 100, 64));
         }
 
-        // Odunlar (64 Tane - 50 TL)
         gui.setItem(slot++, createStackMarketItem(Material.OAK_LOG, "Meşe Odunu", 50, 64));
         gui.setItem(slot++, createStackMarketItem(Material.SPRUCE_LOG, "Ladin Odunu", 50, 64));
 
-        // Yünler (64 Tane - 50 TL)
         gui.setItem(slot++, createStackMarketItem(Material.WHITE_WOOL, "Beyaz Yün", 50, 64));
         gui.setItem(slot++, createStackMarketItem(Material.RED_WOOL, "Kırmızı Yün", 50, 64));
         gui.setItem(slot++, createStackMarketItem(Material.BLACK_WOOL, "Siyah Yün", 50, 64));
@@ -205,12 +202,10 @@ public class Main extends JavaPlugin implements Listener {
         double totalPrice = unitPrice * amount;
         ItemStack target = selectedItem.get(player.getUniqueId());
 
-        // Miktar Düğmeleri (Yeşil Camlar / Kırmızı Camlar)
         gui.setItem(18, createGuiItem(Material.RED_STAINED_GLASS_PANE, ChatColor.RED + "-32", ""));
         gui.setItem(19, createGuiItem(Material.RED_STAINED_GLASS_PANE, ChatColor.RED + "-16", ""));
         gui.setItem(20, createGuiItem(Material.RED_STAINED_GLASS_PANE, ChatColor.RED + "-1", ""));
 
-        // Gösterge (Kağıt)
         ItemStack paper = new ItemStack(Material.PAPER, amount);
         ItemMeta pMeta = paper.getItemMeta();
         pMeta.setDisplayName(ChatColor.GREEN + "Almak için tıkla");
@@ -223,7 +218,6 @@ public class Main extends JavaPlugin implements Listener {
         gui.setItem(26, createGuiItem(Material.LIME_STAINED_GLASS_PANE, ChatColor.GREEN + "+32", ""));
         gui.setItem(23, createGuiItem(Material.LIME_STAINED_GLASS_PANE, ChatColor.GREEN + "64 Yap", ""));
 
-        // Satın Alınan Ürün
         ItemStack displayItem = target.clone();
         displayItem.setAmount(amount);
         gui.setItem(13, displayItem);
@@ -231,7 +225,7 @@ public class Main extends JavaPlugin implements Listener {
         gui.setItem(40, createGuiItem(Material.BARRIER, ChatColor.RED + "Kapat", ""));
     }
 
-    // --- EVENT LISTENER (TILSIM VE TIKLAMA ENGELLEYİCİ) ---
+    // --- EVENT LISTENER ---
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
@@ -240,7 +234,7 @@ public class Main extends JavaPlugin implements Listener {
             event.getView().getTitle().contains("Esyalar") ||
             event.getView().getTitle().contains("Satın Alma Yeri")) {
 
-            event.setCancelled(true); // Eşya almayı engeller
+            event.setCancelled(true);
 
             if (event.getCurrentItem() == null || event.getCurrentItem().getType() == Material.AIR) return;
             Player player = (Player) event.getWhoClicked();
@@ -251,7 +245,6 @@ public class Main extends JavaPlugin implements Listener {
                 return;
             }
 
-            // Ana Menü
             if (event.getView().getTitle().contains("Sunucu Magazasi")) {
                 if (clicked.getType() == Material.NETHERITE_SWORD) openSwordMenu(player);
                 else if (clicked.getType() == Material.NETHERITE_CHESTPLATE) openArmorMenu(player);
@@ -262,14 +255,13 @@ public class Main extends JavaPlugin implements Listener {
                 return;
             }
 
-            // Kategori İçi Eşyalara Tıklama -> Miktar Menüsünü Aç
             if (!event.getView().getTitle().contains("Satın Alma Yeri")) {
                 double price = getPriceFromLore(clicked);
                 if (price > 0) {
                     ItemStack clone = clicked.clone();
                     ItemMeta meta = clone.getItemMeta();
                     if (meta != null && meta.hasLore()) {
-                        meta.setLore(null); // Fiyat açıklamasını kaldırarak eşyayı temiz ver
+                        meta.setLore(null);
                         clone.setItemMeta(meta);
                     }
                     openBuyMenu(player, clone, price);
@@ -277,7 +269,6 @@ public class Main extends JavaPlugin implements Listener {
                 return;
             }
 
-            // Satın Alma Menüsü Tıklamaları
             if (event.getView().getTitle().contains("Satın Alma Yeri")) {
                 int currentAmt = selectedAmount.getOrDefault(player.getUniqueId(), 1);
 
@@ -299,7 +290,6 @@ public class Main extends JavaPlugin implements Listener {
 
                 selectedAmount.put(player.getUniqueId(), currentAmt);
 
-                // Kağıda Tıklandıysa Satın Al
                 if (clicked.getType() == Material.PAPER) {
                     executePurchase(player);
                     return;
@@ -321,14 +311,13 @@ public class Main extends JavaPlugin implements Listener {
             return;
         }
 
-        // Envanter Doluluk Kontrolü
         if (player.getInventory().firstEmpty() == -1) {
             player.sendMessage(ChatColor.RED + "Envanterin dolu! Lütfen yer açıp tekrar dene.");
             return;
         }
 
         econ.withdrawPlayer(player, totalCost);
-        itemToGive.setAmount(amount * itemToGive.getAmount()); // Tek seferde kaçlı veriliyorsa katla
+        itemToGive.setAmount(amount * itemToGive.getAmount());
         player.getInventory().addItem(itemToGive);
 
         player.sendMessage(ChatColor.GREEN + "Başarıyla " + amount + " adet satın aldın! Ödenen: ₺" + totalCost);
@@ -399,3 +388,4 @@ public class Main extends JavaPlugin implements Listener {
         return sb.toString().trim();
     }
 }
+
