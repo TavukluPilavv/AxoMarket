@@ -14,7 +14,6 @@ import java.util.List;
 
 public class MarketGUI {
 
-    // ANA MENÜ
     public static void openMainMenu(Player player) {
         Inventory inv = Bukkit.createInventory(null, 27, ChatColor.DARK_GRAY + "AxoMarket - Ana Menü");
 
@@ -26,7 +25,6 @@ public class MarketGUI {
         player.openInventory(inv);
     }
 
-    // BLOKLAR MENÜSÜ (20 TL)
     public static void openBlocksMenu(Player player) {
         Inventory inv = Bukkit.createInventory(null, 36, ChatColor.DARK_GRAY + "AxoMarket - Bloklar");
 
@@ -45,33 +43,27 @@ public class MarketGUI {
         player.openInventory(inv);
     }
 
-    // KILIÇLAR & EKİPMANLAR MENÜSÜ
     public static void openWeaponsMenu(Player player) {
         Inventory inv = Bukkit.createInventory(null, 36, ChatColor.DARK_GRAY + "AxoMarket - Ekipmanlar");
 
-        // Elmas Kılıç (Savurma 2 Büyülü)
         ItemStack diamondSword = new ItemStack(Material.DIAMOND_SWORD);
         diamondSword.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 5);
         diamondSword.addUnsafeEnchantment(Enchantment.KNOCKBACK, 2);
         inv.setItem(10, createPriceItemCustom(diamondSword, ChatColor.AQUA + "Elmas Kılıç (Savurma II)", 500.0));
 
-        // Keskinlik 6 Netherite Kılıç
         ItemStack kes6Sword = new ItemStack(Material.NETHERITE_SWORD);
         kes6Sword.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 6);
         inv.setItem(12, createPriceItemCustom(kes6Sword, ChatColor.GOLD + "Netherite Kılıç (Keskinlik VI)", 1500.0));
 
-        // Keskinlik 7 Netherite Kılıç
         ItemStack kes7Sword = new ItemStack(Material.NETHERITE_SWORD);
         kes7Sword.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 7);
         inv.setItem(13, createPriceItemCustom(kes7Sword, ChatColor.LIGHT_PURPLE + "Netherite Kılıç (Keskinlik VII)", 3000.0));
 
-        // Kazma (Servet 3 / Verimlilik 6)
         ItemStack pickaxe = new ItemStack(Material.NETHERITE_PICKAXE);
         pickaxe.addUnsafeEnchantment(Enchantment.DIG_SPEED, 6);
         pickaxe.addUnsafeEnchantment(Enchantment.LOOT_BONUS_BLOCKS, 3);
         inv.setItem(14, createPriceItemCustom(pickaxe, ChatColor.YELLOW + "Verimlilik VI Kazma", 1200.0));
 
-        // Elytra
         ItemStack elytra = new ItemStack(Material.ELYTRA);
         elytra.addUnsafeEnchantment(Enchantment.DURABILITY, 3);
         inv.setItem(16, createPriceItemCustom(elytra, ChatColor.DARK_PURPLE + "Elytra (Kırılmazlık III)", 2500.0));
@@ -80,7 +72,6 @@ public class MarketGUI {
         player.openInventory(inv);
     }
 
-    // ZIRH SETLERİ MENÜSÜ
     public static void openArmorMenu(Player player) {
         Inventory inv = Bukkit.createInventory(null, 27, ChatColor.DARK_GRAY + "AxoMarket - Zırhlar");
 
@@ -104,11 +95,9 @@ public class MarketGUI {
         player.openInventory(inv);
     }
 
-    // MADENLER (50 TL) VE DEMİRCİ ŞABLONLARI (2000 TL)
     public static void openOresAndTemplatesMenu(Player player) {
         Inventory inv = Bukkit.createInventory(null, 36, ChatColor.DARK_GRAY + "AxoMarket - Maden & Şablon");
 
-        // Madenler (50 TL)
         inv.setItem(0, createPriceItem(Material.DIAMOND, 1, 50.0, "Maden"));
         inv.setItem(1, createPriceItem(Material.NETHERITE_INGOT, 1, 50.0, "Maden"));
         inv.setItem(2, createPriceItem(Material.REDSTONE, 1, 50.0, "Maden"));
@@ -116,7 +105,6 @@ public class MarketGUI {
         inv.setItem(4, createPriceItem(Material.EMERALD, 1, 50.0, "Maden"));
         inv.setItem(5, createPriceItem(Material.AMETHYST_SHARD, 1, 50.0, "Maden (Mor Cevher)"));
 
-        // 1.20 Demirci Şablonları (Smithing Templates - 2000 TL)
         Material[] templates = {
                 Material.NETHERITE_UPGRADE_SMITHING_TEMPLATE, Material.COAST_ARMOR_TRIM_SMITHING_TEMPLATE,
                 Material.DUNE_ARMOR_TRIM_SMITHING_TEMPLATE, Material.EYE_ARMOR_TRIM_SMITHING_TEMPLATE,
