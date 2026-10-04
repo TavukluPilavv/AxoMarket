@@ -3,46 +3,24 @@ package com.craftaxo.axomarket;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 public class MarketListener implements Listener {
 
-    private final Main plugin;
-    private final Map<UUID, TradeSession> activeSessions = new HashMap<>();
-
-    public MarketListener(Main plugin) {
-        this.plugin = plugin;
-    }
-
-    private static class TradeSession {
-        ItemStack item;
-        double singlePrice;
-        int amount;
-
-        TradeSession(ItemStack item, double singlePrice, int amount) {
-            this.item = item;
-            this.singlePrice = singlePrice;
-            this.amount = amount;
-        }
-    }
+    private final Economy econ = Main.getEconomy();
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        if (event.getView().getTitle() == null) return;
         String title = event.getView().getTitle();
-
-        if (!title.contains("Market") && !title.contains("Kategorisi") && !title.contains("Satın Alma Ekranı")) return;
+        if (!title.startsWith(ChatColor.DARK_GRAY + "AxoMarket")) return;
 
         event.setCancelled(true);
 
@@ -50,120 +28,109 @@ public class MarketListener implements Listener {
 
         Player player = (Player) event.getWhoClicked();
         ItemStack clicked = event.getCurrentItem();
+        ItemMeta meta = clicked.getItemMeta();
 
-        // Kapat Butonu
-        if (clicked.getType() == Material.BARRIER) {
-            player.closeInventory();
+        if (meta == null) return;
+
+        // GERİ DÖN
+        if (clicked.getType() == Material.BARRIER && meta.getDisplayName().contains("Geri Dön")) {
+            MarketGUI.openMainMenu(player);
             return;
         }
 
         // ANA MENÜ TIKLAMALARI
-        if (title.contains("Sunucu Marketi")) {
-            if (clicked.getType() == Material.NETHERITE_SWORD) MarketGUI.openSwordCategory(player);
-            else if (clicked.getType() == Material.NETHERITE_PICKAXE) MarketGUI.openPickaxeCategory(player);
-            else if (clicked.getType() == Material.NETHERITE_CHESTPLATE) MarketGUI.openArmorCategory(player);
-            else if (clicked.getType() == Material.ENCHANTED_GOLDEN_APPLE) MarketGUI.openSpecialCategory(player);
-            else if (clicked.getType() == Material.OAK_TRAPDOOR) MarketGUI.openTrapCategory(player);
-            else if (clicked.getType() == Material.WHITE_CONCRETE) MarketGUI.openBlockCategory(player);
-            return;
-        }
-
-        // KATEGORİ İÇİ TIKLAMALARI -> SATIN ALMA EKRANINA GEÇİŞ
-        if (title.contains("Kategorisi")) {
-            double price = extractPriceFromLore(clicked);
-            if (price > 0) {
-                activeSessions.put(player.getUniqueId(), new TradeSession(clicked.clone(), price, 1));
-                MarketGUI.openBuyMenu(player, clicked, price, 1);
+        if (title.endsWith("Ana Menü")) {
+            switch (clicked.getType()) {
+                case STONE: MarketGUI.openBlocksMenu(player); break;
+                case DIAMOND_SWORD: MarketGUI.openWeaponsMenu(player); break;
+                case DIAMOND_CHESTPLATE: MarketGUI.openArmorMenu(player); break;
+                case NETHERITE_UPGRADE_SMITHING_TEMPLATE: MarketGUI.openOresAndTemplatesMenu(player); break;
             }
             return;
         }
 
-        // SATIN ALMA EKRANI TIKLAMALARI (+1, -1, Kağıt)
-        if (title.contains("Satın Alma Ekranı")) {
-            TradeSession session = activeSessions.get(player.getUniqueId());
-            if (session == null) return;
+        // FİYAT OKUMA VE SATIN ALMA
+        List<String> lore = meta.getLore();
+        if (lore == null) return;
 
-            // Camlar ile Miktar Değişimi
-            if (clicked.getType() == Material.LIME_STAINED_GLASS_PANE || clicked.getType() == Material.RED_STAINED_GLASS_PANE) {
-                String name = ChatColor.stripColor(clicked.getItemMeta().getDisplayName());
-                int delta = Integer.parseInt(name);
-                session.amount = Math.max(1, Math.min(64, session.amount + delta));
-                MarketGUI.openBuyMenu(player, session.item, session.singlePrice, session.amount);
-                return;
-            }
-
-            // Satın Alma Onayı (Kağıt)
-            if (clicked.getType() == Material.PAPER) {
-                double total = session.singlePrice * session.amount;
-                Economy econ = Main.getEconomy();
-
-                if (econ.getBalance(player) < total) {
-                    player.sendMessage(ChatColor.RED + "Yetersiz bakiye! Gerekli: ₺" + total);
-                    return;
-                }
-
-                econ.withdrawPlayer(player, total);
-
-                // Eşyayı Hazırla ve Büyüleri Bas (InfiniteEnchant Uygunluğu)
-                ItemStack finalGive = cleanAndEnchantItem(session.item, session.amount);
-                player.getInventory().addItem(finalGive);
-
-                player.sendMessage(ChatColor.GREEN + "Başarıyla " + session.amount + " adet alındı! Ödenen: ₺" + total);
-                player.closeInventory();
-                activeSessions.remove(player.getUniqueId());
-            }
-        }
-    }
-
-    private double extractPriceFromLore(ItemStack item) {
-        if (!item.hasItemMeta() || !item.getItemMeta().hasLore()) return 0.0;
-        List<String> lore = item.getItemMeta().getLore();
+        double basePrice = -1;
         for (String line : lore) {
-            if (line.contains("Alış Fiyatı:")) {
-                String clean = ChatColor.stripColor(line).replaceAll("[^0-9.]", "");
+            if (line.contains("Fiyat:")) {
+                String priceStr = ChatColor.stripColor(line).replaceAll("[^0-9.]", "");
                 try {
-                    return Double.parseDouble(clean);
+                    basePrice = Double.parseDouble(priceStr);
                 } catch (Exception ignored) {}
+                break;
             }
         }
-        return 0.0;
-    }
 
-    private ItemStack cleanAndEnchantItem(ItemStack rawItem, int amount) {
-        ItemStack item = new ItemStack(rawItem.getType(), amount);
-        ItemMeta meta = item.getItemMeta();
-        ItemMeta rawMeta = rawItem.getItemMeta();
+        if (basePrice <= 0) return;
 
-        if (meta != null && rawMeta != null) {
-            meta.setDisplayName(rawMeta.getDisplayName());
-            item.setItemMeta(meta);
+        int amountToBuy = (event.getClick() == ClickType.RIGHT) ? 64 : 1;
+        double totalPrice = basePrice * amountToBuy;
 
-            // Lore'daki yazılara göre yüksek seviye büyüleri doğrudan ekle (InfiniteEnchanted uyumlu)
-            if (rawMeta.hasLore()) {
-                for (String line : rawMeta.getLore()) {
-                    String clean = ChatColor.stripColor(line);
-                    if (clean.contains("Keskinlik")) addUnsafeEnchant(item, Enchantment.DAMAGE_ALL, getLevel(clean));
-                    if (clean.contains("Verimlilik")) addUnsafeEnchant(item, Enchantment.DIG_SPEED, getLevel(clean));
-                    if (clean.contains("Koruma")) addUnsafeEnchant(item, Enchantment.PROTECTION_ENVIRONMENTAL, getLevel(clean));
-                    if (clean.contains("Kırılmazlık")) addUnsafeEnchant(item, Enchantment.DURABILITY, getLevel(clean));
-                    if (clean.contains("Tamir")) addUnsafeEnchant(item, Enchantment.MENDING, 1);
-                    if (clean.contains("Alevden Çehre")) addUnsafeEnchant(item, Enchantment.FIRE_ASPECT, getLevel(clean));
-                    if (clean.contains("Savurma")) addUnsafeEnchant(item, Enchantment.KNOCKBACK, getLevel(clean));
-                    if (clean.contains("Servet")) addUnsafeEnchant(item, Enchantment.LOOT_BONUS_BLOCKS, getLevel(clean));
+        if (econ.getBalance(player) < totalPrice) {
+            player.sendMessage(ChatColor.RED + "Yetersiz Bakiye! Gerekli: " + totalPrice + " TL");
+            return;
+        }
+
+        ItemStack buyItem = clicked.clone();
+        ItemMeta buyMeta = buyItem.getItemMeta();
+
+        if (buyMeta != null && buyMeta.hasLore()) {
+            List<String> cleanLore = buyMeta.getLore();
+            cleanLore.removeIf(l -> l.contains("Fiyat:") || l.contains("Satın Al") || l.contains("["));
+            buyMeta.setLore(cleanLore);
+            buyItem.setItemMeta(buyMeta);
+        }
+
+        boolean isStackable = buyItem.getMaxStackSize() > 1;
+
+        if (isStackable) {
+            buyItem.setAmount(amountToBuy);
+            if (hasInventorySpace(player, buyItem)) {
+                econ.withdrawPlayer(player, totalPrice);
+                player.getInventory().addItem(buyItem);
+                player.sendMessage(ChatColor.GREEN + "Başarıyla " + amountToBuy + " adet satın alındı! Ödenen: " + totalPrice + " TL");
+            } else {
+                player.sendMessage(ChatColor.RED + "Envanterinizde yeterli boş yer yok!");
+            }
+        } else {
+            buyItem.setAmount(1);
+            int givenCount = 0;
+
+            for (int i = 0; i < amountToBuy; i++) {
+                if (player.getInventory().firstEmpty() != -1) {
+                    player.getInventory().addItem(buyItem.clone());
+                    givenCount++;
+                } else {
+                    break;
                 }
             }
+
+            if (givenCount > 0) {
+                double finalCost = basePrice * givenCount;
+                econ.withdrawPlayer(player, finalCost);
+                player.sendMessage(ChatColor.GREEN + "Başarıyla " + givenCount + " adet satın alındı! Ödenen: " + finalCost + " TL");
+
+                if (givenCount < amountToBuy) {
+                    player.sendMessage(ChatColor.YELLOW + "Envanteriniz dolduğu için sadece " + givenCount + " adet alabildiniz.");
+                }
+            } else {
+                player.sendMessage(ChatColor.RED + "Envanteriniz tamamen dolu!");
+            }
         }
-        return item;
     }
 
-    private void addUnsafeEnchant(ItemStack item, Enchantment ench, int level) {
-        if (level > 0) {
-            item.addUnsafeEnchantment(ench, level);
+    private boolean hasInventorySpace(Player player, ItemStack item) {
+        int freeSpace = 0;
+        for (ItemStack invItem : player.getInventory().getStorageContents()) {
+            if (invItem == null || invItem.getType() == Material.AIR) {
+                freeSpace += item.getMaxStackSize();
+            } else if (invItem.isSimilar(item)) {
+                freeSpace += (item.getMaxStackSize() - invItem.getAmount());
+            }
         }
-    }
-
-    private int getLevel(String text) {
-        String num = text.replaceAll("[^0-9]", "");
-        return num.isEmpty() ? 1 : Integer.parseInt(num);
+        return freeSpace >= item.getAmount();
     }
 }
