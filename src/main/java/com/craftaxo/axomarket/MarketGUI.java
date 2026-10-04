@@ -38,7 +38,7 @@ public class MarketGUI {
         };
 
         for (int i = 0; i < blocks.length; i++) {
-            inv.setItem(i, createPriceItem(blocks[i], 1, 20.0, null));
+            inv.setItem(i, createPriceItem(blocks[i], 1, 20.0, "Blok"));
         }
 
         inv.setItem(31, createGuiItem(Material.BARRIER, ChatColor.RED + "Geri Dön"));
@@ -55,12 +55,12 @@ public class MarketGUI {
         diamondSword.addUnsafeEnchantment(Enchantment.KNOCKBACK, 2);
         inv.setItem(10, createPriceItemCustom(diamondSword, ChatColor.AQUA + "Elmas Kılıç (Savurma II)", 500.0));
 
-        // InfiniteEnchanted Keskinlik 6 Netherite Kılıç
+        // Keskinlik 6 Netherite Kılıç
         ItemStack kes6Sword = new ItemStack(Material.NETHERITE_SWORD);
         kes6Sword.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 6);
         inv.setItem(12, createPriceItemCustom(kes6Sword, ChatColor.GOLD + "Netherite Kılıç (Keskinlik VI)", 1500.0));
 
-        // InfiniteEnchanted Keskinlik 7 Netherite Kılıç
+        // Keskinlik 7 Netherite Kılıç
         ItemStack kes7Sword = new ItemStack(Material.NETHERITE_SWORD);
         kes7Sword.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 7);
         inv.setItem(13, createPriceItemCustom(kes7Sword, ChatColor.LIGHT_PURPLE + "Netherite Kılıç (Keskinlik VII)", 3000.0));
@@ -161,7 +161,7 @@ public class MarketGUI {
             lore.add(ChatColor.GOLD + "Fiyat: " + ChatColor.YELLOW + price + " TL");
             lore.add(" ");
             lore.add(ChatColor.GREEN + " Sol Tık: 1 Adet Satın Al");
-            lore.add(ChatColor.AQUA + " Sağ Tık: 64 Adet (1 Stack) Satın Al");
+            lore.add(ChatColor.AQUA + " Sağ Tık: 64 Adet Satın Al");
             meta.setLore(lore);
             item.setItemMeta(meta);
         }
