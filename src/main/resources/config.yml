@@ -1,0 +1,9 @@
+# AxoMarket Ayar Dosyasi
+
+messages:
+  prefix: "&8[&6AxoMarket&8] "
+  no-money: "&cYetersiz bakiye!"
+  buy-success: "&aEsyalar basariyla satin alindi!"
+
+settings:
+  vault-enabled: true
