@@ -1,0 +1,10 @@
+name: AxoMarket
+version: 1.0
+main: com.craftaxo.axomarket.Main
+api-version: 1.16
+depend: [Vault]
+commands:
+  market:
+    description: Market menüsünü açar.
+    aliases: [shop]
+
