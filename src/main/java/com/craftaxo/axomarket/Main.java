@@ -82,11 +82,12 @@ public class Main extends JavaPlugin implements Listener {
     public void openSwordMenu(Player player) {
         Inventory gui = Bukkit.createInventory(null, 36, ChatColor.DARK_GRAY + "Kilic Kategorisi");
 
-        gui.setItem(10, createMarketItem(Material.NETHERITE_SWORD, ChatColor.RED + "Kes5 Alev2 Kır3 Netherite", 10000, Map.of(Enchantment.DAMAGE_ALL, 5, Enchantment.FIRE_ASPECT, 2, Enchantment.DURABILITY, 3)));
-        gui.setItem(11, createMarketItem(Material.DIAMOND_SWORD, ChatColor.AQUA + "Kes5 Al2 Kır3 Sav2 Elmas Kılıç", 7000, Map.of(Enchantment.DAMAGE_ALL, 5, Enchantment.FIRE_ASPECT, 2, Enchantment.DURABILITY, 3, Enchantment.KNOCKBACK, 2)));
-        gui.setItem(12, createMarketItem(Material.NETHERITE_SWORD, ChatColor.DARK_PURPLE + "Kes6 Kır3 Al2 Netherite", 45000, Map.of(Enchantment.DAMAGE_ALL, 6, Enchantment.DURABILITY, 3, Enchantment.FIRE_ASPECT, 2)));
-        gui.setItem(13, createMarketItem(Material.NETHERITE_SWORD, ChatColor.DARK_PURPLE + "Kes6 Savurma1 Kır3 Netherite", 45000, Map.of(Enchantment.DAMAGE_ALL, 6, Enchantment.KNOCKBACK, 1, Enchantment.DURABILITY, 3)));
-        gui.setItem(14, createMarketItem(Material.NETHERITE_SWORD, ChatColor.GOLD + "Kes7 Kır3 Al2 Netherite", 150000, Map.of(Enchantment.DAMAGE_ALL, 7, Enchantment.DURABILITY, 3, Enchantment.FIRE_ASPECT, 2)));
+        // Fiyatlar 1.5 TL yapıldı, kılıç adları ve büyüleri tam adlarıyla düzenlendi
+        gui.setItem(10, createMarketItem(Material.NETHERITE_SWORD, ChatColor.RED + "Keskinlik V Alevden Çember II Kırılmazlık III Netherite Kılıç", 1.5, Map.of(Enchantment.DAMAGE_ALL, 5, Enchantment.FIRE_ASPECT, 2, Enchantment.DURABILITY, 3)));
+        gui.setItem(11, createMarketItem(Material.DIAMOND_SWORD, ChatColor.AQUA + "Keskinlik V Alevden Çember II Kırılmazlık III Savurma II Elmas Kılıç", 1.5, Map.of(Enchantment.DAMAGE_ALL, 5, Enchantment.FIRE_ASPECT, 2, Enchantment.DURABILITY, 3, Enchantment.KNOCKBACK, 2)));
+        gui.setItem(12, createMarketItem(Material.NETHERITE_SWORD, ChatColor.DARK_PURPLE + "Keskinlik VI Kırılmazlık III Alevden Çember II Netherite Kılıç", 1.5, Map.of(Enchantment.DAMAGE_ALL, 6, Enchantment.DURABILITY, 3, Enchantment.FIRE_ASPECT, 2)));
+        gui.setItem(13, createMarketItem(Material.NETHERITE_SWORD, ChatColor.DARK_PURPLE + "Keskinlik VI Savurma I Kırılmazlık III Netherite Kılıç", 1.5, Map.of(Enchantment.DAMAGE_ALL, 6, Enchantment.KNOCKBACK, 1, Enchantment.DURABILITY, 3)));
+        gui.setItem(14, createMarketItem(Material.NETHERITE_SWORD, ChatColor.GOLD + "Keskinlik VII Kırılmazlık III Alevden Çember II Netherite Kılıç", 1.5, Map.of(Enchantment.DAMAGE_ALL, 7, Enchantment.DURABILITY, 3, Enchantment.FIRE_ASPECT, 2)));
 
         gui.setItem(31, createGuiItem(Material.BARRIER, ChatColor.RED + "Kapat", ""));
         player.openInventory(gui);
@@ -96,12 +97,11 @@ public class Main extends JavaPlugin implements Listener {
         Inventory gui = Bukkit.createInventory(null, 36, ChatColor.DARK_GRAY + "Set Kategorisi");
         Map<Enchantment, Integer> setEnchants = Map.of(Enchantment.PROTECTION_ENVIRONMENTAL, 4, Enchantment.DURABILITY, 3, Enchantment.MENDING, 1);
 
-        gui.setItem(10, createMarketItem(Material.NETHERITE_HELMET, ChatColor.GREEN + "Netherite Kask (P4 Kır3 Onarım)", 10000, setEnchants));
-        gui.setItem(11, createMarketItem(Material.NETHERITE_CHESTPLATE, ChatColor.GREEN + "Netherite Zırh (P4 Kır3 Onarım)", 10000, setEnchants));
-        gui.setItem(12, createMarketItem(Material.NETHERITE_LEGGINGS, ChatColor.GREEN + "Netherite Pantolon (P4 Kır3 Onarım)", 10000, setEnchants));
-        gui.setItem(13, createMarketItem(Material.NETHERITE_BOOTS, ChatColor.GREEN + "Netherite Çizme (P4 Kır3 Onarım)", 10000, setEnchants));
-
-        gui.setItem(15, createMarketItem(Material.NETHERITE_UPGRADE_SMITHING_TEMPLATE, ChatColor.GOLD + "Netherite Yükseltme Şablonu", 15000, null));
+        gui.setItem(10, createMarketItem(Material.NETHERITE_HELMET, ChatColor.GREEN + "Netherite Kask (Koruma IV Kırılmazlık III Onarım)", 1.5, setEnchants));
+        gui.setItem(11, createMarketItem(Material.NETHERITE_CHESTPLATE, ChatColor.GREEN + "Netherite Zırh (Koruma IV Kırılmazlık III Onarım)", 1.5, setEnchants));
+        gui.setItem(12, createMarketItem(Material.NETHERITE_LEGGINGS, ChatColor.GREEN + "Netherite Pantolon (Koruma IV Kırılmazlık III Onarım)", 1.5, setEnchants));
+        gui.setItem(13, createMarketItem(Material.NETHERITE_BOOTS, ChatColor.GREEN + "Netherite Çizme (Koruma IV Kırılmazlık III Onarım)", 1.5, setEnchants));
+        gui.setItem(15, createMarketItem(Material.NETHERITE_UPGRADE_SMITHING_TEMPLATE, ChatColor.GOLD + "Netherite Yükseltme Şablonu", 1.5, null));
 
         gui.setItem(31, createGuiItem(Material.BARRIER, ChatColor.RED + "Kapat", ""));
         player.openInventory(gui);
@@ -110,14 +110,14 @@ public class Main extends JavaPlugin implements Listener {
     public void openPickaxeMenu(Player player) {
         Inventory gui = Bukkit.createInventory(null, 36, ChatColor.DARK_GRAY + "Kazma Kategorisi");
 
-        gui.setItem(9, createMarketItem(Material.NETHERITE_PICKAXE, "Ver5 Kır3 Onarım", 1000, Map.of(Enchantment.DIG_SPEED, 5, Enchantment.DURABILITY, 3, Enchantment.MENDING, 1)));
-        gui.setItem(10, createMarketItem(Material.NETHERITE_PICKAXE, "Ver6 Kır3 Onarım", 2500, Map.of(Enchantment.DIG_SPEED, 6, Enchantment.DURABILITY, 3, Enchantment.MENDING, 1)));
-        gui.setItem(11, createMarketItem(Material.NETHERITE_PICKAXE, "Ver7 Kır3 Onarım", 4000, Map.of(Enchantment.DIG_SPEED, 7, Enchantment.DURABILITY, 3, Enchantment.MENDING, 1)));
-        gui.setItem(12, createMarketItem(Material.NETHERITE_PICKAXE, "Ver8 Kır3 Onarım", 6000, Map.of(Enchantment.DIG_SPEED, 8, Enchantment.DURABILITY, 3, Enchantment.MENDING, 1)));
-        gui.setItem(13, createMarketItem(Material.NETHERITE_PICKAXE, "Ver9 Kır3 Onarım", 10000, Map.of(Enchantment.DIG_SPEED, 9, Enchantment.DURABILITY, 3, Enchantment.MENDING, 1)));
-        gui.setItem(14, createMarketItem(Material.NETHERITE_PICKAXE, "Ver15 Kır3 Onarım", 70000, Map.of(Enchantment.DIG_SPEED, 15, Enchantment.DURABILITY, 3, Enchantment.MENDING, 1)));
-        gui.setItem(15, createMarketItem(Material.NETHERITE_PICKAXE, "Ver25 Kır3 Onarım", 130000, Map.of(Enchantment.DIG_SPEED, 25, Enchantment.DURABILITY, 3, Enchantment.MENDING, 1)));
-        gui.setItem(16, createMarketItem(Material.NETHERITE_PICKAXE, "Ver50 Kır3 Servet3 Onarım", 750000, Map.of(Enchantment.DIG_SPEED, 50, Enchantment.DURABILITY, 3, Enchantment.LOOT_BONUS_BLOCKS, 3, Enchantment.MENDING, 1)));
+        gui.setItem(9, createMarketItem(Material.NETHERITE_PICKAXE, "Verimlilik V Kırılmazlık III Onarım", 1.5, Map.of(Enchantment.DIG_SPEED, 5, Enchantment.DURABILITY, 3, Enchantment.MENDING, 1)));
+        gui.setItem(10, createMarketItem(Material.NETHERITE_PICKAXE, "Verimlilik VI Kırılmazlık III Onarım", 1.5, Map.of(Enchantment.DIG_SPEED, 6, Enchantment.DURABILITY, 3, Enchantment.MENDING, 1)));
+        gui.setItem(11, createMarketItem(Material.NETHERITE_PICKAXE, "Verimlilik VII Kırılmazlık III Onarım", 1.5, Map.of(Enchantment.DIG_SPEED, 7, Enchantment.DURABILITY, 3, Enchantment.MENDING, 1)));
+        gui.setItem(12, createMarketItem(Material.NETHERITE_PICKAXE, "Verimlilik VIII Kırılmazlık III Onarım", 1.5, Map.of(Enchantment.DIG_SPEED, 8, Enchantment.DURABILITY, 3, Enchantment.MENDING, 1)));
+        gui.setItem(13, createMarketItem(Material.NETHERITE_PICKAXE, "Verimlilik IX Kırılmazlık III Onarım", 1.5, Map.of(Enchantment.DIG_SPEED, 9, Enchantment.DURABILITY, 3, Enchantment.MENDING, 1)));
+        gui.setItem(14, createMarketItem(Material.NETHERITE_PICKAXE, "Verimlilik XV Kırılmazlık III Onarım", 1.5, Map.of(Enchantment.DIG_SPEED, 15, Enchantment.DURABILITY, 3, Enchantment.MENDING, 1)));
+        gui.setItem(15, createMarketItem(Material.NETHERITE_PICKAXE, "Verimlilik XXV Kırılmazlık III Onarım", 1.5, Map.of(Enchantment.DIG_SPEED, 25, Enchantment.DURABILITY, 3, Enchantment.MENDING, 1)));
+        gui.setItem(16, createMarketItem(Material.NETHERITE_PICKAXE, "Verimlilik L Kırılmazlık III Servet III Onarım", 1.5, Map.of(Enchantment.DIG_SPEED, 50, Enchantment.DURABILITY, 3, Enchantment.LOOT_BONUS_BLOCKS, 3, Enchantment.MENDING, 1)));
 
         gui.setItem(31, createGuiItem(Material.BARRIER, ChatColor.RED + "Kapat", ""));
         player.openInventory(gui);
@@ -126,15 +126,15 @@ public class Main extends JavaPlugin implements Listener {
     public void openTrapMenu(Player player) {
         Inventory gui = Bukkit.createInventory(null, 36, ChatColor.DARK_GRAY + "Trap Kategorisi");
 
-        gui.setItem(10, createStackMarketItem(Material.OAK_TRAPDOOR, "Tuzak Kapısı (Meşe)", 100, 64));
-        gui.setItem(11, createStackMarketItem(Material.DARK_OAK_TRAPDOOR, "Tuzak Kapısı (Karanlık Meşe)", 100, 64));
-        gui.setItem(12, createStackMarketItem(Material.IRON_TRAPDOOR, "Demir Tuzak Kapısı", 100, 64));
-        gui.setItem(13, createStackMarketItem(Material.STRING, "İp", 100, 64));
-        gui.setItem(14, createStackMarketItem(Material.REDSTONE, "Kızıltaş", 100, 64));
-        gui.setItem(15, createStackMarketItem(Material.PISTON, "Piston", 100, 64));
-        gui.setItem(16, createStackMarketItem(Material.STICKY_PISTON, "Yapışkan Piston", 100, 64));
-        gui.setItem(19, createStackMarketItem(Material.LEVER, "Şalter", 320, 64));
-        gui.setItem(20, createStackMarketItem(Material.WATER_BUCKET, "Su Kovası", 20, 1));
+        // Demir tuzak kapısı (IRON_TRAPDOOR) listeden tamamen kaldırıldı, fiyatlar 1.5 TL yapıldı
+        gui.setItem(10, createStackMarketItem(Material.OAK_TRAPDOOR, "Tuzak Kapısı (Meşe)", 1.5, 64));
+        gui.setItem(11, createStackMarketItem(Material.DARK_OAK_TRAPDOOR, "Tuzak Kapısı (Karanlık Meşe)", 1.5, 64));
+        gui.setItem(13, createStackMarketItem(Material.STRING, "İp", 1.5, 64));
+        gui.setItem(14, createStackMarketItem(Material.REDSTONE, "Kızıltaş", 1.5, 64));
+        gui.setItem(15, createStackMarketItem(Material.PISTON, "Piston", 1.5, 64));
+        gui.setItem(16, createStackMarketItem(Material.STICKY_PISTON, "Yapışkan Piston", 1.5, 64));
+        gui.setItem(19, createStackMarketItem(Material.LEVER, "Şalter", 1.5, 32));
+        gui.setItem(20, createStackMarketItem(Material.WATER_BUCKET, "Su Kovası", 1.5, 1));
 
         gui.setItem(31, createGuiItem(Material.BARRIER, ChatColor.RED + "Kapat", ""));
         player.openInventory(gui);
@@ -151,16 +151,15 @@ public class Main extends JavaPlugin implements Listener {
         };
         int slot = 0;
         for (Material c : concretes) {
-            gui.setItem(slot++, createStackMarketItem(c, getCleanName(c.name()), 100, 64));
+            gui.setItem(slot++, createStackMarketItem(c, getCleanName(c.name()), 1.5, 64));
         }
 
-        gui.setItem(slot++, createStackMarketItem(Material.OAK_LOG, "Meşe Odunu", 50, 64));
-        gui.setItem(slot++, createStackMarketItem(Material.SPRUCE_LOG, "Ladin Odunu", 50, 64));
-
-        gui.setItem(slot++, createStackMarketItem(Material.WHITE_WOOL, "Beyaz Yün", 50, 64));
-        gui.setItem(slot++, createStackMarketItem(Material.RED_WOOL, "Kırmızı Yün", 50, 64));
-        gui.setItem(slot++, createStackMarketItem(Material.BLACK_WOOL, "Siyah Yün", 50, 64));
-        gui.setItem(slot++, createStackMarketItem(Material.BLUE_WOOL, "Mavi Yün", 50, 64));
+        gui.setItem(slot++, createStackMarketItem(Material.OAK_LOG, "Meşe Odunu", 1.5, 64));
+        gui.setItem(slot++, createStackMarketItem(Material.SPRUCE_LOG, "Ladin Odunu", 1.5, 64));
+        gui.setItem(slot++, createStackMarketItem(Material.WHITE_WOOL, "Beyaz Yün", 1.5, 64));
+        gui.setItem(slot++, createStackMarketItem(Material.RED_WOOL, "Kırmızı Yün", 1.5, 64));
+        gui.setItem(slot++, createStackMarketItem(Material.BLACK_WOOL, "Siyah Yün", 1.5, 64));
+        gui.setItem(slot++, createStackMarketItem(Material.BLUE_WOOL, "Mavi Yün", 1.5, 64));
 
         gui.setItem(49, createGuiItem(Material.BARRIER, ChatColor.RED + "Kapat", ""));
         player.openInventory(gui);
@@ -169,15 +168,15 @@ public class Main extends JavaPlugin implements Listener {
     public void openSpecialMenu(Player player) {
         Inventory gui = Bukkit.createInventory(null, 36, ChatColor.DARK_GRAY + "Ozel Esyalar");
 
-        gui.setItem(10, createMarketItem(Material.ENCHANTED_GOLDEN_APPLE, "Büyülü Altın Elma", 500, null));
-        gui.setItem(11, createMarketItem(Material.ELYTRA, "Elitra (Kır3 Onarım)", 200000, Map.of(Enchantment.DURABILITY, 3, Enchantment.MENDING, 1)));
-        gui.setItem(12, createMarketItem(Material.SHIELD, "Kalkan", 500, null));
-        gui.setItem(13, createStackMarketItem(Material.FIREWORK_ROCKET, "Fişek", 15, 1));
-        gui.setItem(14, createStackMarketItem(Material.EXPERIENCE_BOTTLE, "XP Şişesi (1 Stak)", 800, 64));
-        gui.setItem(15, createMarketItem(Material.BOW, "Yay", 50, null));
-        gui.setItem(16, createPotionItem("Ateş Direnci (İçilen 3dk)", PotionEffectType.FIRE_RESISTANCE, 3 * 60 * 20, false, 2000));
-        gui.setItem(19, createPotionItem("Ateş Direnci (Atılan 3dk)", PotionEffectType.FIRE_RESISTANCE, 3 * 60 * 20, true, 2000));
-        gui.setItem(20, createPotionItem("Ateş Direnci (8dk)", PotionEffectType.FIRE_RESISTANCE, 8 * 60 * 20, false, 2000));
+        gui.setItem(10, createMarketItem(Material.ENCHANTED_GOLDEN_APPLE, "Büyülü Altın Elma", 1.5, null));
+        gui.setItem(11, createMarketItem(Material.ELYTRA, "Elitra (Kırılmazlık III Onarım)", 1.5, Map.of(Enchantment.DURABILITY, 3, Enchantment.MENDING, 1)));
+        gui.setItem(12, createMarketItem(Material.SHIELD, "Kalkan", 1.5, null));
+        gui.setItem(13, createStackMarketItem(Material.FIREWORK_ROCKET, "Fişek", 1.5, 1));
+        gui.setItem(14, createStackMarketItem(Material.EXPERIENCE_BOTTLE, "XP Şişesi (1 Stak)", 1.5, 64));
+        gui.setItem(15, createMarketItem(Material.BOW, "Yay", 1.5, null));
+        gui.setItem(16, createPotionItem("Ateş Direnci (İçilen 3dk)", PotionEffectType.FIRE_RESISTANCE, 3 * 60 * 20, false, 1.5));
+        gui.setItem(19, createPotionItem("Ateş Direnci (Atılan 3dk)", PotionEffectType.FIRE_RESISTANCE, 3 * 60 * 20, true, 1.5));
+        gui.setItem(20, createPotionItem("Ateş Direnci (8dk)", PotionEffectType.FIRE_RESISTANCE, 8 * 60 * 20, false, 1.5));
 
         gui.setItem(31, createGuiItem(Material.BARRIER, ChatColor.RED + "Kapat", ""));
         player.openInventory(gui);
@@ -206,10 +205,10 @@ public class Main extends JavaPlugin implements Listener {
         gui.setItem(19, createGuiItem(Material.RED_STAINED_GLASS_PANE, ChatColor.RED + "-16", ""));
         gui.setItem(20, createGuiItem(Material.RED_STAINED_GLASS_PANE, ChatColor.RED + "-1", ""));
 
-        ItemStack paper = new ItemStack(Material.PAPER, amount);
+        ItemStack paper = new ItemStack(Material.PAPER, amount > 0 ? Math.min(amount, 64) : 1);
         ItemMeta pMeta = paper.getItemMeta();
-        pMeta.setDisplayName(ChatColor.GREEN + "Almak için tıkla");
-        pMeta.setLore(List.of(ChatColor.AQUA + "₺" + String.format("%.2f", totalPrice)));
+        pMeta.setDisplayName(ChatColor.GREEN + "Satın Almak İçin Tıkla");
+        pMeta.setLore(List.of(ChatColor.AQUA + "Toplam: ₺" + String.format("%.2f", totalPrice)));
         paper.setItemMeta(pMeta);
         gui.setItem(22, paper);
 
@@ -219,7 +218,7 @@ public class Main extends JavaPlugin implements Listener {
         gui.setItem(23, createGuiItem(Material.LIME_STAINED_GLASS_PANE, ChatColor.GREEN + "64 Yap", ""));
 
         ItemStack displayItem = target.clone();
-        displayItem.setAmount(amount);
+        displayItem.setAmount(Math.min(Math.max(amount, 1), 64));
         gui.setItem(13, displayItem);
 
         gui.setItem(40, createGuiItem(Material.BARRIER, ChatColor.RED + "Kapat", ""));
@@ -229,10 +228,8 @@ public class Main extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        if (event.getView().getTitle().contains("Magazasi") ||
-            event.getView().getTitle().contains("Kategorisi") ||
-            event.getView().getTitle().contains("Esyalar") ||
-            event.getView().getTitle().contains("Satın Alma Yeri")) {
+        String title = event.getView().getTitle();
+        if (title.contains("Magazasi") || title.contains("Kategorisi") || title.contains("Esyalar") || title.contains("Satın Alma Yeri")) {
 
             event.setCancelled(true);
 
@@ -245,7 +242,7 @@ public class Main extends JavaPlugin implements Listener {
                 return;
             }
 
-            if (event.getView().getTitle().contains("Sunucu Magazasi")) {
+            if (title.contains("Sunucu Magazasi")) {
                 if (clicked.getType() == Material.NETHERITE_SWORD) openSwordMenu(player);
                 else if (clicked.getType() == Material.NETHERITE_CHESTPLATE) openArmorMenu(player);
                 else if (clicked.getType() == Material.NETHERITE_PICKAXE) openPickaxeMenu(player);
@@ -255,7 +252,7 @@ public class Main extends JavaPlugin implements Listener {
                 return;
             }
 
-            if (!event.getView().getTitle().contains("Satın Alma Yeri")) {
+            if (!title.contains("Satın Alma Yeri")) {
                 double price = getPriceFromLore(clicked);
                 if (price > 0) {
                     ItemStack clone = clicked.clone();
@@ -269,16 +266,16 @@ public class Main extends JavaPlugin implements Listener {
                 return;
             }
 
-            if (event.getView().getTitle().contains("Satın Alma Yeri")) {
+            if (title.contains("Satın Alma Yeri")) {
                 int currentAmt = selectedAmount.getOrDefault(player.getUniqueId(), 1);
 
-                if (clicked.getType() == Material.LIME_STAINED_GLASS_PANE) {
+                if (clicked.getType() == Material.LIME_STAINED_GLASS_PANE && clicked.hasItemMeta()) {
                     String name = clicked.getItemMeta().getDisplayName();
                     if (name.contains("+1")) currentAmt += 1;
                     else if (name.contains("+16")) currentAmt += 16;
                     else if (name.contains("+32")) currentAmt += 32;
                     else if (name.contains("64 Yap")) currentAmt = 64;
-                } else if (clicked.getType() == Material.RED_STAINED_GLASS_PANE) {
+                } else if (clicked.getType() == Material.RED_STAINED_GLASS_PANE && clicked.hasItemMeta()) {
                     String name = clicked.getItemMeta().getDisplayName();
                     if (name.contains("-1")) currentAmt -= 1;
                     else if (name.contains("-16")) currentAmt -= 16;
@@ -290,6 +287,7 @@ public class Main extends JavaPlugin implements Listener {
 
                 selectedAmount.put(player.getUniqueId(), currentAmt);
 
+                // Para ve miktar eksiltme/ekleme mantığı hatasız şekilde buraya bağlandı
                 if (clicked.getType() == Material.PAPER) {
                     executePurchase(player);
                     return;
@@ -304,10 +302,15 @@ public class Main extends JavaPlugin implements Listener {
         int amount = selectedAmount.getOrDefault(player.getUniqueId(), 1);
         double unitPrice = selectedUnitPrice.getOrDefault(player.getUniqueId(), 0.0);
         double totalCost = unitPrice * amount;
-        ItemStack itemToGive = selectedItem.get(player.getUniqueId()).clone();
+        
+        ItemStack itemToGive = selectedItem.get(player.getUniqueId());
+        if (itemToGive == null) return;
+        
+        ItemStack finalItem = itemToGive.clone();
+        finalItem.setAmount(amount);
 
         if (econ.getBalance(player) < totalCost) {
-            player.sendMessage(ChatColor.RED + "Yetersiz bakiye! Gerekli: ₺" + totalCost);
+            player.sendMessage(ChatColor.RED + "Yetersiz bakiye! Gerekli: ₺" + String.format("%.2f", totalCost));
             return;
         }
 
@@ -317,10 +320,9 @@ public class Main extends JavaPlugin implements Listener {
         }
 
         econ.withdrawPlayer(player, totalCost);
-        itemToGive.setAmount(amount * itemToGive.getAmount());
-        player.getInventory().addItem(itemToGive);
+        player.getInventory().addItem(finalItem);
 
-        player.sendMessage(ChatColor.GREEN + "Başarıyla " + amount + " adet satın aldın! Ödenen: ₺" + totalCost);
+        player.sendMessage(ChatColor.GREEN + "Başarıyla " + amount + " adet satın aldın! Ödenen: ₺" + String.format("%.2f", totalCost));
         player.closeInventory();
     }
 
@@ -371,7 +373,7 @@ public class Main extends JavaPlugin implements Listener {
             for (String line : item.getItemMeta().getLore()) {
                 if (line.contains("Fiyat: ₺")) {
                     try {
-                        return Double.parseDouble(ChatColor.stripColor(line).replace("Fiyat: ₺", ""));
+                        return Double.parseDouble(ChatColor.stripColor(line).replace("Fiyat: ₺", "").trim());
                     } catch (Exception ignored) {}
                 }
             }
@@ -388,4 +390,3 @@ public class Main extends JavaPlugin implements Listener {
         return sb.toString().trim();
     }
 }
-
