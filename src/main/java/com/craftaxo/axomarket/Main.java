@@ -82,12 +82,12 @@ public class Main extends JavaPlugin implements Listener {
     public void openSwordMenu(Player player) {
         Inventory gui = Bukkit.createInventory(null, 36, ChatColor.DARK_GRAY + "Kilic Kategorisi");
 
-        // Fiyatlar 1.5 TL yapıldı, kılıç adları ve büyüleri tam adlarıyla düzenlendi
+        // İstediğin Keskinlik VII (150k) ve Keskinlik VI (40k) fiyatlandırmaları eklendi
         gui.setItem(10, createMarketItem(Material.NETHERITE_SWORD, ChatColor.RED + "Keskinlik V Alevden Çember II Kırılmazlık III Netherite Kılıç", 1.5, Map.of(Enchantment.DAMAGE_ALL, 5, Enchantment.FIRE_ASPECT, 2, Enchantment.DURABILITY, 3)));
         gui.setItem(11, createMarketItem(Material.DIAMOND_SWORD, ChatColor.AQUA + "Keskinlik V Alevden Çember II Kırılmazlık III Savurma II Elmas Kılıç", 1.5, Map.of(Enchantment.DAMAGE_ALL, 5, Enchantment.FIRE_ASPECT, 2, Enchantment.DURABILITY, 3, Enchantment.KNOCKBACK, 2)));
-        gui.setItem(12, createMarketItem(Material.NETHERITE_SWORD, ChatColor.DARK_PURPLE + "Keskinlik VI Kırılmazlık III Alevden Çember II Netherite Kılıç", 1.5, Map.of(Enchantment.DAMAGE_ALL, 6, Enchantment.DURABILITY, 3, Enchantment.FIRE_ASPECT, 2)));
-        gui.setItem(13, createMarketItem(Material.NETHERITE_SWORD, ChatColor.DARK_PURPLE + "Keskinlik VI Savurma I Kırılmazlık III Netherite Kılıç", 1.5, Map.of(Enchantment.DAMAGE_ALL, 6, Enchantment.KNOCKBACK, 1, Enchantment.DURABILITY, 3)));
-        gui.setItem(14, createMarketItem(Material.NETHERITE_SWORD, ChatColor.GOLD + "Keskinlik VII Kırılmazlık III Alevden Çember II Netherite Kılıç", 1.5, Map.of(Enchantment.DAMAGE_ALL, 7, Enchantment.DURABILITY, 3, Enchantment.FIRE_ASPECT, 2)));
+        gui.setItem(12, createMarketItem(Material.NETHERITE_SWORD, ChatColor.DARK_PURPLE + "Keskinlik VI Kırılmazlık III Alevden Çember II Netherite Kılıç", 40000.0, Map.of(Enchantment.DAMAGE_ALL, 6, Enchantment.DURABILITY, 3, Enchantment.FIRE_ASPECT, 2)));
+        gui.setItem(13, createMarketItem(Material.NETHERITE_SWORD, ChatColor.DARK_PURPLE + "Keskinlik VI Savurma I Kırılmazlık III Netherite Kılıç", 40000.0, Map.of(Enchantment.DAMAGE_ALL, 6, Enchantment.KNOCKBACK, 1, Enchantment.DURABILITY, 3)));
+        gui.setItem(14, createMarketItem(Material.NETHERITE_SWORD, ChatColor.GOLD + "Keskinlik VII Kırılmazlık III Alevden Çember II Netherite Kılıç", 150000.0, Map.of(Enchantment.DAMAGE_ALL, 7, Enchantment.DURABILITY, 3, Enchantment.FIRE_ASPECT, 2)));
 
         gui.setItem(31, createGuiItem(Material.BARRIER, ChatColor.RED + "Kapat", ""));
         player.openInventory(gui);
@@ -126,7 +126,6 @@ public class Main extends JavaPlugin implements Listener {
     public void openTrapMenu(Player player) {
         Inventory gui = Bukkit.createInventory(null, 36, ChatColor.DARK_GRAY + "Trap Kategorisi");
 
-        // Demir tuzak kapısı (IRON_TRAPDOOR) listeden tamamen kaldırıldı, fiyatlar 1.5 TL yapıldı
         gui.setItem(10, createStackMarketItem(Material.OAK_TRAPDOOR, "Tuzak Kapısı (Meşe)", 1.5, 64));
         gui.setItem(11, createStackMarketItem(Material.DARK_OAK_TRAPDOOR, "Tuzak Kapısı (Karanlık Meşe)", 1.5, 64));
         gui.setItem(13, createStackMarketItem(Material.STRING, "İp", 1.5, 64));
@@ -287,7 +286,6 @@ public class Main extends JavaPlugin implements Listener {
 
                 selectedAmount.put(player.getUniqueId(), currentAmt);
 
-                // Para ve miktar eksiltme/ekleme mantığı hatasız şekilde buraya bağlandı
                 if (clicked.getType() == Material.PAPER) {
                     executePurchase(player);
                     return;
