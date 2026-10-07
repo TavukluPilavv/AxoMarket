@@ -82,12 +82,11 @@ public class Main extends JavaPlugin implements Listener {
     public void openSwordMenu(Player player) {
         Inventory gui = Bukkit.createInventory(null, 36, ChatColor.DARK_GRAY + "Kilic Kategorisi");
 
-        // İstediğin Keskinlik VII (150k) ve Keskinlik VI (40k) fiyatlandırmaları eklendi
-        gui.setItem(10, createMarketItem(Material.NETHERITE_SWORD, ChatColor.RED + "Keskinlik V Alevden Çember II Kırılmazlık III Netherite Kılıç", 1.5, Map.of(Enchantment.DAMAGE_ALL, 5, Enchantment.FIRE_ASPECT, 2, Enchantment.DURABILITY, 3)));
-        gui.setItem(11, createMarketItem(Material.DIAMOND_SWORD, ChatColor.AQUA + "Keskinlik V Alevden Çember II Kırılmazlık III Savurma II Elmas Kılıç", 1.5, Map.of(Enchantment.DAMAGE_ALL, 5, Enchantment.FIRE_ASPECT, 2, Enchantment.DURABILITY, 3, Enchantment.KNOCKBACK, 2)));
-        gui.setItem(12, createMarketItem(Material.NETHERITE_SWORD, ChatColor.DARK_PURPLE + "Keskinlik VI Kırılmazlık III Alevden Çember II Netherite Kılıç", 40000.0, Map.of(Enchantment.DAMAGE_ALL, 6, Enchantment.DURABILITY, 3, Enchantment.FIRE_ASPECT, 2)));
+        gui.setItem(10, createMarketItem(Material.NETHERITE_SWORD, ChatColor.RED + "Keskinlik V Alevden Çehre II", 1.5, Map.of(Enchantment.DAMAGE_ALL, 5, Enchantment.FIRE_ASPECT, 2)));
+        gui.setItem(11, createMarketItem(Material.DIAMOND_SWORD, ChatColor.AQUA + "Keskinlik V Savurma I", 1.5, Map.of(Enchantment.DAMAGE_ALL, 5, Enchantment.KNOCKBACK, 1)));
+        gui.setItem(12, createMarketItem(Material.NETHERITE_SWORD, ChatColor.DARK_PURPLE + "Keskinlik VI Kırılmazlık III Alevden Çehre II Netherite Kılıç", 40000.0, Map.of(Enchantment.DAMAGE_ALL, 6, Enchantment.DURABILITY, 3, Enchantment.FIRE_ASPECT, 2)));
         gui.setItem(13, createMarketItem(Material.NETHERITE_SWORD, ChatColor.DARK_PURPLE + "Keskinlik VI Savurma I Kırılmazlık III Netherite Kılıç", 40000.0, Map.of(Enchantment.DAMAGE_ALL, 6, Enchantment.KNOCKBACK, 1, Enchantment.DURABILITY, 3)));
-        gui.setItem(14, createMarketItem(Material.NETHERITE_SWORD, ChatColor.GOLD + "Keskinlik VII Kırılmazlık III Alevden Çember II Netherite Kılıç", 150000.0, Map.of(Enchantment.DAMAGE_ALL, 7, Enchantment.DURABILITY, 3, Enchantment.FIRE_ASPECT, 2)));
+        gui.setItem(14, createMarketItem(Material.NETHERITE_SWORD, ChatColor.GOLD + "Keskinlik VII Kırılmazlık III Alevden Çehre II Netherite Kılıç", 150000.0, Map.of(Enchantment.DAMAGE_ALL, 7, Enchantment.DURABILITY, 3, Enchantment.FIRE_ASPECT, 2)));
 
         gui.setItem(31, createGuiItem(Material.BARRIER, ChatColor.RED + "Kapat", ""));
         player.openInventory(gui);
@@ -117,7 +116,7 @@ public class Main extends JavaPlugin implements Listener {
         gui.setItem(13, createMarketItem(Material.NETHERITE_PICKAXE, "Verimlilik IX Kırılmazlık III Onarım", 1.5, Map.of(Enchantment.DIG_SPEED, 9, Enchantment.DURABILITY, 3, Enchantment.MENDING, 1)));
         gui.setItem(14, createMarketItem(Material.NETHERITE_PICKAXE, "Verimlilik XV Kırılmazlık III Onarım", 1.5, Map.of(Enchantment.DIG_SPEED, 15, Enchantment.DURABILITY, 3, Enchantment.MENDING, 1)));
         gui.setItem(15, createMarketItem(Material.NETHERITE_PICKAXE, "Verimlilik XXV Kırılmazlık III Onarım", 1.5, Map.of(Enchantment.DIG_SPEED, 25, Enchantment.DURABILITY, 3, Enchantment.MENDING, 1)));
-        gui.setItem(16, createMarketItem(Material.NETHERITE_PICKAXE, "Verimlilik L Kırılmazlık III Servet III Onarım", 1.5, Map.of(Enchantment.DIG_SPEED, 50, Enchantment.DURABILITY, 3, Enchantment.LOOT_BONUS_BLOCKS, 3, Enchantment.MENDING, 1)));
+        gui.setItem(16, createMarketItem(Material.NETHERITE_PICKAXE, "Verimlilik L Kırılmazlık III Servet III Onarım", 1000000.0, Map.of(Enchantment.DIG_SPEED, 50, Enchantment.DURABILITY, 3, Enchantment.LOOT_BONUS_BLOCKS, 3, Enchantment.MENDING, 1)));
 
         gui.setItem(31, createGuiItem(Material.BARRIER, ChatColor.RED + "Kapat", ""));
         player.openInventory(gui);
@@ -167,15 +166,16 @@ public class Main extends JavaPlugin implements Listener {
     public void openSpecialMenu(Player player) {
         Inventory gui = Bukkit.createInventory(null, 36, ChatColor.DARK_GRAY + "Ozel Esyalar");
 
-        gui.setItem(10, createMarketItem(Material.ENCHANTED_GOLDEN_APPLE, "Büyülü Altın Elma", 1.5, null));
-        gui.setItem(11, createMarketItem(Material.ELYTRA, "Elitra (Kırılmazlık III Onarım)", 1.5, Map.of(Enchantment.DURABILITY, 3, Enchantment.MENDING, 1)));
-        gui.setItem(12, createMarketItem(Material.SHIELD, "Kalkan", 1.5, null));
-        gui.setItem(13, createStackMarketItem(Material.FIREWORK_ROCKET, "Fişek", 1.5, 1));
-        gui.setItem(14, createStackMarketItem(Material.EXPERIENCE_BOTTLE, "XP Şişesi (1 Stak)", 1.5, 64));
-        gui.setItem(15, createMarketItem(Material.BOW, "Yay", 1.5, null));
-        gui.setItem(16, createPotionItem("Ateş Direnci (İçilen 3dk)", PotionEffectType.FIRE_RESISTANCE, 3 * 60 * 20, false, 1.5));
-        gui.setItem(19, createPotionItem("Ateş Direnci (Atılan 3dk)", PotionEffectType.FIRE_RESISTANCE, 3 * 60 * 20, true, 1.5));
-        gui.setItem(20, createPotionItem("Ateş Direnci (8dk)", PotionEffectType.FIRE_RESISTANCE, 8 * 60 * 20, false, 1.5));
+        gui.setItem(10, createMarketItem(Material.ENCHANTED_GOLDEN_APPLE, "Büyülü Altın Elma", 2.0, null));
+        gui.setItem(11, createMarketItem(Material.ELYTRA, "Elitra (Kırılmazlık III Onarım)", 200000.0, Map.of(Enchantment.DURABILITY, 3, Enchantment.MENDING, 1)));
+        gui.setItem(12, createMarketItem(Material.TOTEM_OF_UNDYING, "Ölümsüzlük Totemi", 1000000.0, null));
+        gui.setItem(13, createMarketItem(Material.SHIELD, "Kalkan", 1.5, null));
+        gui.setItem(14, createStackMarketItem(Material.FIREWORK_ROCKET, "Fişek", 1.5, 1));
+        gui.setItem(15, createStackMarketItem(Material.EXPERIENCE_BOTTLE, "XP Şişesi (1 Stak)", 1.5, 64));
+        gui.setItem(16, createMarketItem(Material.BOW, "Yay", 10.0, null));
+        gui.setItem(19, createPotionItem("Ateş Direnci (İçilen 3dk)", PotionEffectType.FIRE_RESISTANCE, 3 * 60 * 20, false, 2000.0));
+        gui.setItem(20, createPotionItem("Ateş Direnci (Atılan 3dk)", PotionEffectType.FIRE_RESISTANCE, 3 * 60 * 20, true, 2000.0));
+        gui.setItem(21, createPotionItem("Ateş Direnci (8dk)", PotionEffectType.FIRE_RESISTANCE, 8 * 60 * 20, false, 2000.0));
 
         gui.setItem(31, createGuiItem(Material.BARRIER, ChatColor.RED + "Kapat", ""));
         player.openInventory(gui);
@@ -347,8 +347,8 @@ public class Main extends JavaPlugin implements Listener {
         return item;
     }
 
-    private ItemStack createStackMarketItem(Material material, String name, double price, int stackSize) {
-        ItemStack item = new ItemStack(material, stackSize);
+    private ItemStack createStackMarketItem(Material material, String name, double price, int defaultStackSize) {
+        ItemStack item = new ItemStack(material, 1);
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName(name);
         meta.setLore(List.of(ChatColor.GREEN + "Fiyat: ₺" + price, ChatColor.YELLOW + "Satın almak için tıkla"));
@@ -388,4 +388,3 @@ public class Main extends JavaPlugin implements Listener {
         return sb.toString().trim();
     }
 }
-
