@@ -1,4 +1,4 @@
-name: AxoMarket
+Name: AxoMarket
 version: 1.0
 main: com.craftaxo.axomarket.Main
 api-version: 1.21
@@ -7,4 +7,6 @@ commands:
   market:
     description: Market menüsünü açar.
     aliases: [shop]
-
+  marketedit:
+    description: Market düzenleme menüsünü açar.
+    permission: axomarket.admin
