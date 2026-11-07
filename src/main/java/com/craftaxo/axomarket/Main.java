@@ -308,13 +308,6 @@ public class Main extends JavaPlugin implements Listener {
             return;
         }
 
-        if (!hasEnoughSpace(player, itemToGive, totalAmount)) {
-            player.sendMessage(ChatColor.RED + "Envanterinizde yeterli yer yok! Lütfen boşluk açıp tekrar deneyin.");
-            return;
-        }
-
-        econ.withdrawPlayer(player, totalCost);
-
         int packSize = Math.max(1, itemToGive.getAmount());
         int actualAmount = totalAmount * packSize;
         ItemStack itemTemplate = itemToGive.clone();
@@ -337,7 +330,6 @@ public class Main extends JavaPlugin implements Listener {
         }
 
         player.sendMessage(ChatColor.GREEN + "Başarıyla satın aldın: " + actualAmount + " adet! Ödenen: ₺" + String.format("%.2f", totalCost));
-        player.sendMessage(ChatColor.GREEN + "Başarıyla " + totalAmount + " adet satın aldın! Ödenen: ₺" + String.format("%.2f", totalCost));
         player.closeInventory();
     }
 
