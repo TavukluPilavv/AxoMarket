@@ -323,85 +323,35 @@ public class Main extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onPlayerChat(AsyncPlayerChatEvent event) {
-        Player player = event.getPlayer();
-        UUID uuid = player.getUniqueId();
-
-        if (!editingState.containsKey(uuid)) return;
-
-        event.setCancelled(true);
-        String message = event.getMessage();
-        String state = editingState.get(uuid);
-
-        Bukkit.getScheduler().runTask(this, () -> {
-            if (state.equals("WAITING_NEW_ITEM_NAME")) {
-                player.sendMessage(ChatColor.GREEN + "Öğe adı kaydedildi! Şimdi simgesini (örneğin: meşale / TORCH) yazın:");
-                editingState.put(uuid, "WAITING_NEW_ITEM_MATERIAL");
-            } else if (state.equals("WAITING_NEW_ITEM_MATERIAL")) {
-                player.sendMessage(ChatColor.GREEN + "Simge seçildi! Market düzenleme menüsüne yönlendiriliyorsunuz.");
-                editingState.remove(uuid);
-                openMainMenu(player, true);
-            } else if (state.equals("WAITING_RENAME")) {
-                player.sendMessage(ChatColor.GREEN + "Başarıyla kaydedildi!");
-                editingState.remove(uuid);
-                tempEditingItem.remove(uuid);
-                openMainMenu(player, true);
+        Player player=event.getPlayer(); UUID id=player.getUniqueId(); String state=editingState.get(id);
+        if(state==null)return; event.setCancelled(true); String msg=event.getMessage().trim();
+        Bukkit.getScheduler().runTask(this,()->{
+            if(state.equals("WAITING_NEW_ITEM_NAME")){
+                ItemStack it=new ItemStack(Material.PAPER); ItemMeta m=it.getItemMeta();m.setDisplayName(ChatColor.WHITE+msg);it.setItemMeta(m);tempEditingItem.put(id,it);
+                editingState.put(id,"WAITING_NEW_ITEM_MATERIAL");player.sendMessage(ChatColor.YELLOW+"Simge materyalini yazın (TORCH/MEŞALE):");
+            } else if(state.equals("WAITING_NEW_ITEM_MATERIAL")){
+                Material mat=Material.matchMaterial(msg.toUpperCase(Locale.ROOT).replace(' ','_')); if(msg.equalsIgnoreCase("meşale"))mat=Material.TORCH;
+                if(mat==null){player.sendMessage(ChatColor.RED+"Materyal tanınmadı, tekrar yazın.");return;}
+                tempEditingItem.get(id).setType(mat);editingState.put(id,"WAITING_NEW_ITEM_PRICE");player.sendMessage(ChatColor.YELLOW+"Fiyatı yazın (10k/1500):");
+            } else if(state.equals("WAITING_NEW_ITEM_PRICE")||state.equals("WAITING_PRICE")){
+                String t=editorTitle.get(id); int slot=editorSlot.getOrDefault(id,-1);
+                double price; try{String v=msg.toLowerCase(Locale.ROOT).replace(",",".");double mult=1;if(v.endsWith("k")){mult=1000;v=v.substring(0,v.length()-1);}else if(v.endsWith("m")){mult=1000000;v=v.substring(0,v.length()-1);}price=Double.parseDouble(v)*mult;}catch(Exception e){player.sendMessage(ChatColor.RED+"Fiyat hatalı, tekrar yazın.");return;}
+                Inventory inv=Bukkit.createInventory(null,t!=null&&t.contains("Blok")?54:36,t);ItemStack[] saved=getConfig().getList("editor."+t+".contents",new ArrayList<>()).toArray(new ItemStack[0]);
+                for(int i=0;i<Math.min(saved.length,inv.getSize());i++)inv.setItem(i,saved[i]);
+                ItemStack item=state.equals("WAITING_NEW_ITEM_PRICE")?tempEditingItem.get(id):(slot>=0?inv.getItem(slot):null);
+                if(item!=null){ItemMeta m=item.getItemMeta();List<String> lore=m.hasLore()?new ArrayList<>(m.getLore()):new ArrayList<>();lore.removeIf(x->ChatColor.stripColor(x).startsWith("Fiyat:"));lore.add(0,ChatColor.GREEN+"Fiyat: ₺"+price);m.setLore(lore);item.setItemMeta(m);if(state.equals("WAITING_NEW_ITEM_PRICE")){int free=-1;for(int i=0;i<inv.getSize();i++)if(inv.getItem(i)==null){free=i;break;}if(free>=0)inv.setItem(free,item);}else inv.setItem(slot,item);
+                    getConfig().set("editor."+t+".contents",inv.getContents());saveConfig();player.sendMessage(ChatColor.GREEN+"Fiyat/ürün kaydedildi!");}
+                editingState.remove(id);tempEditingItem.remove(id);if(t!=null)openSubMenu(player,t.replace(ChatColor.DARK_RED+"[EDİT] ",""),true);
+            } else if(state.equals("WAITING_RENAME")){
+                String t=editorTitle.get(id);int slot=editorSlot.getOrDefault(id,-1);Inventory inv=Bukkit.createInventory(null,t!=null&&t.contains("Blok")?54:36,t);
+                Object raw=getConfig().get("editor."+t+".contents");if(raw instanceof ItemStack[]){ItemStack[] arr=(ItemStack[])raw;for(int i=0;i<Math.min(arr.length,inv.getSize());i++)inv.setItem(i,arr[i]);}
+                ItemStack it=slot>=0?inv.getItem(slot):null;if(it!=null){ItemMeta m=it.getItemMeta();m.setDisplayName(ChatColor.WHITE+msg);it.setItemMeta(m);inv.setItem(slot,it);getConfig().set("editor."+t+".contents",inv.getContents());saveConfig();}
+                editingState.remove(id);player.sendMessage(ChatColor.GREEN+"İsim kaydedildi!");if(t!=null)openSubMenu(player,t.replace(ChatColor.DARK_RED+"[EDİT] ",""),true);
             }
         });
     }
 
-    private void executePurchase(Player player) {
-        int totalAmount = selectedAmount.getOrDefault(player.getUniqueId(), 1);
-        double unitPrice = selectedUnitPrice.getOrDefault(player.getUniqueId(), 0.0);
-        double totalCost = unitPrice * totalAmount;
-        
-        ItemStack itemToGive = selectedItem.get(player.getUniqueId());
-        if (itemToGive == null) return;
-
-        if (econ.getBalance(player) < totalCost) {
-            player.sendMessage(ChatColor.RED + "Yetersiz bakiye! Gerekli: ₺" + String.format("%.2f", totalCost));
-            return;
-        }
-
-        int packSize = Math.max(1, itemToGive.getAmount());
-        int actualAmount = totalAmount * packSize;
-        ItemStack itemTemplate = itemToGive.clone();
-        itemTemplate.setAmount(1);
-
-        if (!hasEnoughSpace(player, itemTemplate, actualAmount)) {
-            player.sendMessage(ChatColor.RED + "Envanteriniz dolu! Eşyalar envantere sığmıyor.");
-            return;
-        }
-
-        econ.withdrawPlayer(player, totalCost);
-        int remaining = actualAmount;
-        int maxStack = itemTemplate.getMaxStackSize();
-        while (remaining > 0) {
-            int batchSize = Math.min(remaining, maxStack);
-            ItemStack stack = itemTemplate.clone();
-            stack.setAmount(batchSize);
-            player.getInventory().addItem(stack);
-            remaining -= batchSize;
-        }
-
-        player.sendMessage(ChatColor.GREEN + "Başarıyla satın aldın: " + actualAmount + " adet! Ödenen: ₺" + String.format("%.2f", totalCost));
-        player.closeInventory();
-    }
-
-    private boolean hasEnoughSpace(Player player, ItemStack item, int amountNeeded) {
-        int freeSpace = 0;
-        int maxStack = item.getMaxStackSize();
-
-        for (ItemStack content : player.getInventory().getStorageContents()) {
-            if (content == null || content.getType() == Material.AIR) {
-                freeSpace += maxStack;
-            } else if (content.isSimilar(item)) {
-                freeSpace += (maxStack - content.getAmount());
-            }
-        }
-        return freeSpace >= amountNeeded;
-    }
-
-    // --- YARDIMCI METOTLAR ---
+// --- YARDIMCI METOTLAR ---
 
     private ItemStack createGuiItem(Material material, String name, String lore) {
         ItemStack item = new ItemStack(material);
