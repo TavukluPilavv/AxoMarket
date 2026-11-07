@@ -168,7 +168,7 @@ public class Main extends JavaPlugin implements Listener {
         gui.setItem(10, createStackMarketItem(Material.PISTON, "Piston", 100.0, 64));
         gui.setItem(11, createStackMarketItem(Material.STICKY_PISTON, "Yapışkan Piston", 100.0, 64));
         gui.setItem(12, createStackMarketItem(Material.REDSTONE, "Kızıltaş", 4.0, 1));
-        gui.setItem(13, createStackMarketItem(Material.REDSTONE_REPEATER, "Kızıltaş Yenileyici", 3.0, 1));
+        gui.setItem(13, createStackMarketItem(Material.REPEATER, "Kızıltaş Yenileyici", 3.0, 1)); // Düzeltilen kısım
         gui.setItem(14, createStackMarketItem(Material.LEVER, "Şalter", 1.25, 1));
         gui.setItem(15, createStackMarketItem(Material.OAK_FENCE, "Meşe Çit", 2.25, 1));
         gui.setItem(16, createStackMarketItem(Material.OAK_TRAPDOOR, "Tuzak Kapısı", 2.25, 1));
@@ -286,7 +286,6 @@ public class Main extends JavaPlugin implements Listener {
             Player player = (Player) event.getWhoClicked();
             ItemStack clicked = event.getCurrentItem();
 
-            // Barrier butonuna basıldığında direkt menüyü kapatmak yerine ana menüye veya çıkışa yönlendir
             if (clicked.getType() == Material.BARRIER) {
                 if (isEditMode && !title.contains("Market Düzenleme")) {
                     openMainMenu(player, true);
@@ -296,7 +295,6 @@ public class Main extends JavaPlugin implements Listener {
                 return;
             }
 
-            // Düzenleme Modu İşlemleri
             if (isEditMode) {
                 if (clicked.getType() == Material.NETHER_STAR) {
                     player.closeInventory();
@@ -325,7 +323,6 @@ public class Main extends JavaPlugin implements Listener {
                 }
             }
 
-            // Ana Menü Geçişleri
             if (title.equals(ChatColor.DARK_GRAY + "Sunucu Mağazası") || title.equals(ChatColor.DARK_RED + "Market Düzenleme (Admin)")) {
                 boolean edit = title.contains("Admin");
                 if (clicked.getType() == Material.NETHERITE_SWORD) openSwordMenu(player, edit);
@@ -353,7 +350,6 @@ public class Main extends JavaPlugin implements Listener {
                 return;
             }
 
-            // Miktar ve Satın Alma İşlemleri
             if (title.contains("Satın Alma Yeri")) {
                 int currentAmt = selectedAmount.getOrDefault(player.getUniqueId(), 1);
 
