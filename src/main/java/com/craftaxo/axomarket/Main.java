@@ -32,9 +32,10 @@ public class Main extends JavaPlugin implements Listener {
     private final Map<UUID, Integer> selectedAmount = new HashMap<>();
     private final Map<UUID, Double> selectedUnitPrice = new HashMap<>();
 
-    // Düzenleme (Edit) işlemleri için geçici veri tutucular
+    // Düzenleme ve Ekleme İşlemleri İçin Hafıza Verileri
     private final Map<UUID, String> editingState = new HashMap<>();
-    private final Map<UUID, ItemStack> tempEditingItem = new HashMap<>();\n    private final Map<UUID, String> editorTitle = new HashMap<>();\n    private final Map<UUID, Integer> editorSlot = new HashMap<>();
+    private final Map<UUID, ItemStack> tempEditingItem = new HashMap<>();
+    private final Map<UUID, String> targetCategory = new HashMap<>();
 
     @Override
     public void onEnable() {
@@ -78,12 +79,7 @@ public class Main extends JavaPlugin implements Listener {
         return false;
     }
 
-    private void loadEditorContents(String key, Inventory inv) {
-        Object raw=getConfig().get("editor."+key+".contents");
-        if(raw instanceof ItemStack[]){ItemStack[] arr=(ItemStack[])raw;for(int i=0;i<Math.min(arr.length,inv.getSize());i++)inv.setItem(i,arr[i]);}
-    }
-
-    // --- MENÜLER ---
+    // --- ANA MENÜ ---
 
     public void openMainMenu(Player player, boolean editMode) {
         String title = editMode ? ChatColor.DARK_RED + "Market Düzenleme (Admin)" : ChatColor.DARK_GRAY + "Sunucu Mağazası";
@@ -92,95 +88,146 @@ public class Main extends JavaPlugin implements Listener {
         gui.setItem(31, createGuiItem(Material.BARRIER, ChatColor.RED + "Kapat", ""));
 
         if (editMode) {
-            gui.setItem(0, createGuiItem(Material.NETHER_STAR, ChatColor.GREEN + "+ Yeni Kategori / Ürün Ekle", ChatColor.GRAY + "Buraya tıklayarak yeni eşya ekleyin."));
+            gui.setItem(27, createGuiItem(Material.NETHER_STAR, ChatColor.GREEN + "+ Yeni Kategori Ekle", ChatColor.GRAY + "Yeni bir kategori oluşturmak için tıkla."));
         }
 
-        gui.setItem(10, createGuiItem(Material.NETHERITE_SWORD, ChatColor.GOLD + "Kılıçlar", ChatColor.GRAY + (editMode ? "İsmi değiştirmek için SHIFT + Sol Tık. Silmek için Sağ Tık." : "Kılıç kategorisini açmak için tıkla.")));
-        gui.setItem(11, createGuiItem(Material.NETHERITE_CHESTPLATE, ChatColor.GOLD + "Setler", ChatColor.GRAY + (editMode ? "İsmi değiştirmek için SHIFT + Sol Tık. Silmek için Sağ Tık." : "Set kategorisini açmak için tıkla.")));
-        gui.setItem(12, createGuiItem(Material.NETHERITE_PICKAXE, ChatColor.GOLD + "Kazmalar", ChatColor.GRAY + (editMode ? "İsmi değiştirmek için SHIFT + Sol Tık. Silmek için Sağ Tık." : "Kazma kategorisini açmak için tıkla.")));
-        gui.setItem(13, createGuiItem(Material.TRAPPED_CHEST, ChatColor.GOLD + "Trap Eşyaları", ChatColor.GRAY + (editMode ? "İsmi değiştirmek için SHIFT + Sol Tık. Silmek için Sağ Tık." : "Tuzak eşyalarını açmak için tıkla.")));
-        gui.setItem(14, createGuiItem(Material.WHITE_CONCRETE, ChatColor.GOLD + "Bloklar", ChatColor.GRAY + (editMode ? "İsmi değiştirmek için SHIFT + Sol Tık. Silmek için Sağ Tık." : "Blok kategorisini açmak için tıkla.")));
-        gui.setItem(15, createGuiItem(Material.ENCHANTED_GOLDEN_APPLE, ChatColor.GOLD + "Özel Eşyalar", ChatColor.GRAY + (editMode ? "İsmi değiştirmek için SHIFT + Sol Tık. Silmek için Sağ Tık." : "Özel eşyaları açmak için tıkla.")));
+        gui.setItem(10, createGuiItem(Material.NETHERITE_SWORD, ChatColor.GOLD + "Kılıçlar", ChatColor.GRAY + (editMode ? "İsim değiştirmek için SHIFT+Sol Tık | Silmek için Sağ Tık" : "Açmak için tıkla.")));
+        gui.setItem(11, createGuiItem(Material.NETHERITE_CHESTPLATE, ChatColor.GOLD + "Setler", ChatColor.GRAY + (editMode ? "İsim değiştirmek için SHIFT+Sol Tık | Silmek için Sağ Tık" : "Açmak için tıkla.")));
+        gui.setItem(12, createGuiItem(Material.NETHERITE_PICKAXE, ChatColor.GOLD + "Kazmalar", ChatColor.GRAY + (editMode ? "İsim değiştirmek için SHIFT+Sol Tık | Silmek için Sağ Tık" : "Açmak için tıkla.")));
+        gui.setItem(13, createGuiItem(Material.TRAPPED_CHEST, ChatColor.GOLD + "Trap Eşyaları", ChatColor.GRAY + (editMode ? "İsim değiştirmek için SHIFT+Sol Tık | Silmek için Sağ Tık" : "Açmak için tıkla.")));
+        gui.setItem(14, createGuiItem(Material.WHITE_CONCRETE, ChatColor.GOLD + "Bloklar", ChatColor.GRAY + (editMode ? "İsim değiştirmek için SHIFT+Sol Tık | Silmek için Sağ Tık" : "Açmak için tıkla.")));
+        gui.setItem(15, createGuiItem(Material.ENCHANTED_GOLDEN_APPLE, ChatColor.GOLD + "Özel Eşyalar", ChatColor.GRAY + (editMode ? "İsim değiştirmek için SHIFT+Sol Tık | Silmek için Sağ Tık" : "Açmak için tıkla.")));
 
         player.openInventory(gui);
     }
 
-    public void openSubMenu(Player player, String categoryName, boolean editMode) {
-        String titlePrefix = editMode ? ChatColor.DARK_RED + "[EDİT] " : "";
-        int size = categoryName.contains("Blok") ? 54 : 36;
-        Inventory gui = Bukkit.createInventory(null, size, titlePrefix + categoryName);
+    // --- KATEGORİ MENÜLERİ ---
 
-        if (categoryName.contains("Kılıç")) {
-            gui.setItem(10, createMarketItem(Material.NETHERITE_SWORD, ChatColor.RED + "Keskinlik V Alevden Çehre II", 1.5, Map.of(Enchantment.DAMAGE_ALL, 5, Enchantment.FIRE_ASPECT, 2)));
-            gui.setItem(11, createMarketItem(Material.DIAMOND_SWORD, ChatColor.AQUA + "Keskinlik V Savurma I", 1.5, Map.of(Enchantment.DAMAGE_ALL, 5, Enchantment.KNOCKBACK, 1)));
-            gui.setItem(12, createMarketItem(Material.NETHERITE_SWORD, ChatColor.DARK_PURPLE + "Keskinlik VI Kırılmazlık III Alevden Çehre II", 40000.0, Map.of(Enchantment.DAMAGE_ALL, 6, Enchantment.DURABILITY, 3, Enchantment.FIRE_ASPECT, 2)));
-            gui.setItem(13, createMarketItem(Material.NETHERITE_SWORD, ChatColor.DARK_PURPLE + "Keskinlik VI Savurma I Kırılmazlık III", 40000.0, Map.of(Enchantment.DAMAGE_ALL, 6, Enchantment.KNOCKBACK, 1, Enchantment.DURABILITY, 3)));
-            gui.setItem(14, createMarketItem(Material.NETHERITE_SWORD, ChatColor.GOLD + "Keskinlik VII Kırılmazlık III Alevden Çehre II", 150000.0, Map.of(Enchantment.DAMAGE_ALL, 7, Enchantment.DURABILITY, 3, Enchantment.FIRE_ASPECT, 2)));
-        } else if (categoryName.contains("Set")) {
-            Map<Enchantment, Integer> ench = Map.of(Enchantment.PROTECTION_ENVIRONMENTAL, 4, Enchantment.DURABILITY, 3, Enchantment.MENDING, 1);
-            gui.setItem(10, createMarketItem(Material.NETHERITE_HELMET, "Koruma IV Kırılmazlık III Onarım", 1.5, ench));
-            gui.setItem(11, createMarketItem(Material.NETHERITE_CHESTPLATE, "Koruma IV Kırılmazlık III Onarım", 1.5, ench));
-            gui.setItem(12, createMarketItem(Material.NETHERITE_LEGGINGS, "Koruma IV Kırılmazlık III Onarım", 1.5, ench));
-            gui.setItem(13, createMarketItem(Material.NETHERITE_BOOTS, "Koruma IV Kırılmazlık III Onarım", 1.5, ench));
-            gui.setItem(15, createMarketItem(Material.NETHERITE_UPGRADE_SMITHING_TEMPLATE, "Netherite Yükseltme Şablonu", 1.5, null));
-        } else if (categoryName.contains("Kazma")) {
-            int[] levels = {5, 6, 7, 8, 9, 15, 25, 50};
-            double[] prices = {1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1000000.0};
-            for (int i = 0; i < levels.length; i++) {
-                int level = levels[i];
-                Map<Enchantment, Integer> ench = level == 50 ? Map.of(Enchantment.DIG_SPEED, level, Enchantment.DURABILITY, 3, Enchantment.LOOT_BONUS_BLOCKS, 3, Enchantment.MENDING, 1) : Map.of(Enchantment.DIG_SPEED, level, Enchantment.DURABILITY, 3, Enchantment.MENDING, 1);
-                String label = "Verimlilik " + (level == 50 ? "L" : level == 15 ? "XV" : level == 25 ? "XXV" : level) + " Kırılmazlık III" + (level == 50 ? " Servet III" : "") + " Onarım";
-                gui.setItem(9 + i, createMarketItem(Material.NETHERITE_PICKAXE, label, prices[i], ench));
-            }
-        } else if (categoryName.contains("Trap")) {
-            gui.setItem(10, createStackMarketItem(Material.OAK_TRAPDOOR, "Meşe Tuzak Kapısı", 1.5, 64));
-            gui.setItem(11, createStackMarketItem(Material.DARK_OAK_TRAPDOOR, "Koyu Meşe Tuzak Kapısı", 1.5, 64));
-            gui.setItem(13, createStackMarketItem(Material.STRING, "İp", 1.5, 64));
-            gui.setItem(14, createStackMarketItem(Material.REDSTONE, "Kızıltaş", 1.5, 64));
-            gui.setItem(15, createStackMarketItem(Material.PISTON, "Piston", 1.5, 64));
-            gui.setItem(16, createStackMarketItem(Material.STICKY_PISTON, "Yapışkan Piston", 1.5, 64));
-            gui.setItem(19, createStackMarketItem(Material.LEVER, "Şalter", 1.5, 32));
-            gui.setItem(20, createStackMarketItem(Material.WATER_BUCKET, "Su Kovası", 1.5, 1));
-        } else if (categoryName.contains("Blok")) {
-            Material[] mats = {Material.WHITE_CONCRETE, Material.ORANGE_CONCRETE, Material.MAGENTA_CONCRETE, Material.LIGHT_BLUE_CONCRETE, Material.YELLOW_CONCRETE, Material.LIME_CONCRETE, Material.PINK_CONCRETE, Material.GRAY_CONCRETE, Material.LIGHT_GRAY_CONCRETE, Material.CYAN_CONCRETE, Material.PURPLE_CONCRETE, Material.BLUE_CONCRETE, Material.BROWN_CONCRETE, Material.GREEN_CONCRETE, Material.RED_CONCRETE, Material.BLACK_CONCRETE, Material.OAK_LOG, Material.SPRUCE_LOG, Material.WHITE_WOOL, Material.RED_WOOL, Material.BLACK_WOOL, Material.BLUE_WOOL};
-            int slot = 0;
-            for (Material mat : mats) gui.setItem(slot++, createStackMarketItem(mat, getCleanName(mat.name()), 1.5, 64));
-        } else if (categoryName.contains("Özel")) {
-            gui.setItem(10, createStackMarketItem(Material.GOLDEN_APPLE, "Altın Elma (1 Stak)", 130.0, 64));
-            gui.setItem(11, createMarketItem(Material.ELYTRA, "Elitra (Kırılmazlık III Onarım)", 200000.0, Map.of(Enchantment.DURABILITY, 3, Enchantment.MENDING, 1)));
-            gui.setItem(12, createMarketItem(Material.TOTEM_OF_UNDYING, "Totem", 150000.0, null));
-            gui.setItem(13, createMarketItem(Material.SHIELD, "Kalkan", 1.5, null));
-            gui.setItem(14, createStackMarketItem(Material.FIREWORK_ROCKET, "Fişek", 1.5, 1));
-            gui.setItem(15, createStackMarketItem(Material.EXPERIENCE_BOTTLE, "XP Şişesi (1 Stak)", 1.5, 64));
-            gui.setItem(16, createMarketItem(Material.BOW, "Yay", 10.0, null));
-            gui.setItem(19, createPotionItem("Ateş Direnci 5 dk (İçilen)", PotionEffectType.FIRE_RESISTANCE, 5 * 60 * 20, false, 2000.0));
-            gui.setItem(20, createPotionItem("Ateş Direnci 5 dk (Atılan)", PotionEffectType.FIRE_RESISTANCE, 5 * 60 * 20, true, 2000.0));
-            gui.setItem(21, createPotionItem("Ateş Direnci 8 dk (İçilen)", PotionEffectType.FIRE_RESISTANCE, 8 * 60 * 20, false, 2000.0));
-            gui.setItem(22, createPotionArrowItem("Ateş Direnci Oku (32 adet)", 40.0, 32));
+    public void openSwordMenu(Player player, boolean editMode) {
+        Inventory gui = Bukkit.createInventory(null, 36, editMode ? ChatColor.DARK_RED + "[EDİT] Kılıçlar" : ChatColor.DARK_GRAY + "Kılıçlar");
+
+        gui.setItem(10, createMarketItem(Material.NETHERITE_SWORD, "Keskinlik V", 10000.0, Map.of(Enchantment.DAMAGE_ALL, 5, Enchantment.FIRE_ASPECT, 2, Enchantment.DURABILITY, 3)));
+        gui.setItem(11, createMarketItem(Material.DIAMOND_SWORD, "Keskinlik V", 5000.0, Map.of(Enchantment.DAMAGE_ALL, 5, Enchantment.KNOCKBACK, 1, Enchantment.FIRE_ASPECT, 2, Enchantment.DURABILITY, 3)));
+        gui.setItem(12, createMarketItem(Material.NETHERITE_SWORD, "Keskinlik VI", 60000.0, Map.of(Enchantment.DAMAGE_ALL, 6, Enchantment.FIRE_ASPECT, 2, Enchantment.DURABILITY, 3)));
+        gui.setItem(13, createMarketItem(Material.NETHERITE_SWORD, "Keskinlik VI", 75000.0, Map.of(Enchantment.DAMAGE_ALL, 6, Enchantment.KNOCKBACK, 1, Enchantment.FIRE_ASPECT, 2, Enchantment.DURABILITY, 3)));
+        gui.setItem(14, createMarketItem(Material.NETHERITE_SWORD, "Keskinlik VII", 160000.0, Map.of(Enchantment.DAMAGE_ALL, 7, Enchantment.FIRE_ASPECT, 2, Enchantment.DURABILITY, 3)));
+
+        if (editMode) {
+            gui.setItem(26, createGuiItem(Material.NETHER_STAR, ChatColor.GREEN + "+ Eşya Ekle", ""));
+            gui.setItem(25, createGuiItem(Material.COMPASS, ChatColor.AQUA + "Slot Değiştir", ""));
         }
-
-        loadEditorContents(titlePrefix + categoryName, gui);\n        if (editMode) gui.setItem(26, createGuiItem(Material.NETHER_STAR, ChatColor.GREEN + "+ Bu Kategoriye Ürün Ekle", ""));
-        gui.setItem(size == 54 ? 49 : 31, createGuiItem(Material.BARRIER, ChatColor.RED + "Kapat", ""));
+        gui.setItem(31, createGuiItem(Material.BARRIER, ChatColor.RED + "Kapat", ""));
         player.openInventory(gui);
     }
 
-    private ItemStack createPotionArrowItem(String name, double price, int amount) {
-        ItemStack arrows = new ItemStack(Material.TIPPED_ARROW, amount);
-        PotionMeta meta = (PotionMeta) arrows.getItemMeta();
-        meta.setDisplayName(name);
-        meta.addCustomEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 5 * 60 * 20, 0), true);
-        meta.setLore(List.of(ChatColor.GREEN + "Fiyat: ₺" + price, ChatColor.YELLOW + "Satın almak için tıkla"));
-        arrows.setItemMeta(meta);
-        return arrows;
+    public void openArmorMenu(Player player, boolean editMode) {
+        Inventory gui = Bukkit.createInventory(null, 36, editMode ? ChatColor.DARK_RED + "[EDİT] Setler" : ChatColor.DARK_GRAY + "Setler");
+        Map<Enchantment, Integer> setEnchants = Map.of(Enchantment.PROTECTION_ENVIRONMENTAL, 4, Enchantment.DURABILITY, 3, Enchantment.MENDING, 1);
+
+        gui.setItem(9, createMarketItem(Material.DIAMOND_HELMET, "Elmas Kask", 1500.0, setEnchants));
+        gui.setItem(10, createMarketItem(Material.DIAMOND_CHESTPLATE, "Elmas Göğüslük", 2500.0, setEnchants));
+        gui.setItem(11, createMarketItem(Material.DIAMOND_LEGGINGS, "Elmas Pantolon", 2000.0, setEnchants));
+        gui.setItem(12, createMarketItem(Material.DIAMOND_BOOTS, "Elmas Bot", 1200.0, setEnchants));
+        
+        gui.setItem(14, createMarketItem(Material.NETHERITE_HELMET, "Netherite Kask", 10000.0, setEnchants));
+        gui.setItem(15, createMarketItem(Material.NETHERITE_CHESTPLATE, "Netherite Göğüslük", 15000.0, setEnchants));
+        gui.setItem(16, createMarketItem(Material.NETHERITE_LEGGINGS, "Netherite Pantolon", 12000.0, setEnchants));
+        gui.setItem(17, createMarketItem(Material.NETHERITE_BOOTS, "Netherite Bot", 8000.0, setEnchants));
+
+        if (editMode) {
+            gui.setItem(26, createGuiItem(Material.NETHER_STAR, ChatColor.GREEN + "+ Eşya Ekle", ""));
+            gui.setItem(25, createGuiItem(Material.COMPASS, ChatColor.AQUA + "Slot Değiştir", ""));
+        }
+        gui.setItem(31, createGuiItem(Material.BARRIER, ChatColor.RED + "Kapat", ""));
+        player.openInventory(gui);
     }
 
-    private String getCleanName(String name) {
-        String[] words = name.toLowerCase(Locale.ROOT).split("_");
-        StringBuilder sb = new StringBuilder();
-        for (String word : words) sb.append(Character.toUpperCase(word.charAt(0))).append(word.substring(1)).append(" ");
-        return sb.toString().trim();
+    public void openPickaxeMenu(Player player, boolean editMode) {
+        Inventory gui = Bukkit.createInventory(null, 36, editMode ? ChatColor.DARK_RED + "[EDİT] Kazmalar" : ChatColor.DARK_GRAY + "Kazmalar");
+        Map<Enchantment, Integer> baseEnchants = Map.of(Enchantment.DURABILITY, 3, Enchantment.MENDING, 1);
+
+        gui.setItem(9, createMarketItem(Material.NETHERITE_PICKAXE, "Verimlilik VI", 3000.0, withEnchant(baseEnchants, Enchantment.DIG_SPEED, 6)));
+        gui.setItem(10, createMarketItem(Material.NETHERITE_PICKAXE, "Verimlilik VII", 4000.0, withEnchant(baseEnchants, Enchantment.DIG_SPEED, 7)));
+        gui.setItem(11, createMarketItem(Material.NETHERITE_PICKAXE, "Verimlilik VIII", 9000.0, withEnchant(baseEnchants, Enchantment.DIG_SPEED, 8)));
+        gui.setItem(12, createMarketItem(Material.NETHERITE_PICKAXE, "Verimlilik X", 15000.0, withEnchant(baseEnchants, Enchantment.DIG_SPEED, 10)));
+        gui.setItem(13, createMarketItem(Material.NETHERITE_PICKAXE, "Verimlilik XV", 40000.0, withEnchant(baseEnchants, Enchantment.DIG_SPEED, 15)));
+        gui.setItem(14, createMarketItem(Material.NETHERITE_PICKAXE, "Verimlilik XX", 60000.0, withEnchant(baseEnchants, Enchantment.DIG_SPEED, 20)));
+        gui.setItem(15, createMarketItem(Material.NETHERITE_PICKAXE, "Verimlilik XL Servet III", 600000.0, Map.of(Enchantment.DIG_SPEED, 40, Enchantment.LOOT_BONUS_BLOCKS, 3, Enchantment.DURABILITY, 3, Enchantment.MENDING, 1)));
+
+        if (editMode) {
+            gui.setItem(26, createGuiItem(Material.NETHER_STAR, ChatColor.GREEN + "+ Eşya Ekle", ""));
+            gui.setItem(25, createGuiItem(Material.COMPASS, ChatColor.AQUA + "Slot Değiştir", ""));
+        }
+        gui.setItem(31, createGuiItem(Material.BARRIER, ChatColor.RED + "Kapat", ""));
+        player.openInventory(gui);
     }
-    // --- MİKTAR SEÇME VE SATIN ALMA MENÜSÜ ---
+
+    public void openTrapMenu(Player player, boolean editMode) {
+        Inventory gui = Bukkit.createInventory(null, 36, editMode ? ChatColor.DARK_RED + "[EDİT] Trap Eşyaları" : ChatColor.DARK_GRAY + "Trap Eşyaları");
+
+        gui.setItem(10, createStackMarketItem(Material.PISTON, "Piston", 100.0, 64));
+        gui.setItem(11, createStackMarketItem(Material.STICKY_PISTON, "Yapışkan Piston", 100.0, 64));
+        gui.setItem(12, createStackMarketItem(Material.REDSTONE, "Kızıltaş", 4.0, 1));
+        gui.setItem(13, createStackMarketItem(Material.REDSTONE_REPEATER, "Kızıltaş Yenileyici", 3.0, 1));
+        gui.setItem(14, createStackMarketItem(Material.LEVER, "Şalter", 1.25, 1));
+        gui.setItem(15, createStackMarketItem(Material.OAK_FENCE, "Meşe Çit", 2.25, 1));
+        gui.setItem(16, createStackMarketItem(Material.OAK_TRAPDOOR, "Tuzak Kapısı", 2.25, 1));
+
+        if (editMode) {
+            gui.setItem(26, createGuiItem(Material.NETHER_STAR, ChatColor.GREEN + "+ Eşya Ekle", ""));
+            gui.setItem(25, createGuiItem(Material.COMPASS, ChatColor.AQUA + "Slot Değiştir", ""));
+        }
+        gui.setItem(31, createGuiItem(Material.BARRIER, ChatColor.RED + "Kapat", ""));
+        player.openInventory(gui);
+    }
+
+    public void openBlockMenu(Player player, boolean editMode) {
+        Inventory gui = Bukkit.createInventory(null, 54, editMode ? ChatColor.DARK_RED + "[EDİT] Bloklar" : ChatColor.DARK_GRAY + "Bloklar");
+
+        Material[] concretes = {
+                Material.WHITE_CONCRETE, Material.ORANGE_CONCRETE, Material.MAGENTA_CONCRETE, Material.LIGHT_BLUE_CONCRETE,
+                Material.YELLOW_CONCRETE, Material.LIME_CONCRETE, Material.PINK_CONCRETE, Material.GRAY_CONCRETE,
+                Material.LIGHT_GRAY_CONCRETE, Material.CYAN_CONCRETE, Material.PURPLE_CONCRETE, Material.BLUE_CONCRETE,
+                Material.BROWN_CONCRETE, Material.GREEN_CONCRETE, Material.RED_CONCRETE, Material.BLACK_CONCRETE
+        };
+        int slot = 0;
+        for (Material c : concretes) {
+            gui.setItem(slot++, createStackMarketItem(c, getCleanName(c.name()), 3.0, 1));
+        }
+        gui.setItem(slot++, createStackMarketItem(Material.OAK_LOG, "Meşe Kütüğü", 2.0, 1));
+
+        if (editMode) {
+            gui.setItem(52, createGuiItem(Material.NETHER_STAR, ChatColor.GREEN + "+ Eşya Ekle", ""));
+            gui.setItem(51, createGuiItem(Material.COMPASS, ChatColor.AQUA + "Slot Değiştir", ""));
+        }
+        gui.setItem(49, createGuiItem(Material.BARRIER, ChatColor.RED + "Kapat", ""));
+        player.openInventory(gui);
+    }
+
+    public void openSpecialMenu(Player player, boolean editMode) {
+        Inventory gui = Bukkit.createInventory(null, 36, editMode ? ChatColor.DARK_RED + "[EDİT] Özel Eşyalar" : ChatColor.DARK_GRAY + "Özel Eşyalar");
+
+        gui.setItem(10, createStackMarketItem(Material.GOLDEN_APPLE, "Altın Elma", 70.0, 64));
+        gui.setItem(11, createMarketItem(Material.ELYTRA, "Elitra", 160000.0, Map.of(Enchantment.DURABILITY, 3, Enchantment.MENDING, 1)));
+        gui.setItem(12, createMarketItem(Material.TOTEM_OF_UNDYING, "Ölümsüzlük Totemi", 150000.0, null));
+        gui.setItem(13, createStackMarketItem(Material.BOW, "Yay", 30.0, 1));
+        gui.setItem(14, createStackMarketItem(Material.ARROW, "Ateş Direnci Oku", 20.0, 32));
+        gui.setItem(15, createStackMarketItem(Material.EXPERIENCE_BOTTLE, "Tecrübe İksiri", 800.0, 64));
+        gui.setItem(16, createMarketItem(Material.SHIELD, "Kalkan", 200.0, null));
+        
+        gui.setItem(19, createPotionItem("Ateş Direnci (İçilen 3dk)", PotionEffectType.FIRE_RESISTANCE, 3 * 60 * 20, false, 1000.0));
+        gui.setItem(20, createPotionItem("Ateş Direnci (Basılan 3dk)", PotionEffectType.FIRE_RESISTANCE, 3 * 60 * 20, true, 1000.0));
+        gui.setItem(21, createPotionItem("Ateş Direnci (Basılan 8dk)", PotionEffectType.FIRE_RESISTANCE, 8 * 60 * 20, true, 2000.0));
+
+        if (editMode) {
+            gui.setItem(26, createGuiItem(Material.NETHER_STAR, ChatColor.GREEN + "+ Eşya Ekle", ""));
+            gui.setItem(25, createGuiItem(Material.COMPASS, ChatColor.AQUA + "Slot Değiştir", ""));
+        }
+        gui.setItem(31, createGuiItem(Material.BARRIER, ChatColor.RED + "Kapat", ""));
+        player.openInventory(gui);
+    }
+
+    // --- SATIN ALMA MENÜSÜ ---
 
     public void openBuyMenu(Player player, ItemStack targetItem, double unitPrice) {
         Inventory gui = Bukkit.createInventory(null, 45, ChatColor.DARK_GRAY + "Satın Alma Yeri");
@@ -216,20 +263,22 @@ public class Main extends JavaPlugin implements Listener {
         gui.setItem(23, createGuiItem(Material.LIME_STAINED_GLASS_PANE, ChatColor.GREEN + "64 Yap", ""));
 
         ItemStack displayItem = target.clone();
-        displayItem.setAmount(Math.min(Math.max(target.getAmount() * amount, 1), 64));
+        displayItem.setAmount(Math.min(Math.max(amount, 1), 64));
         gui.setItem(13, displayItem);
 
         gui.setItem(40, createGuiItem(Material.BARRIER, ChatColor.RED + "Kapat", ""));
     }
 
-    // --- EVENT LISTENER & CHAT INPUTS ---
+    // --- OLAY YÖNETİCİLERİ (EVENTS) ---
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         String title = event.getView().getTitle();
         boolean isEditMode = title.contains("Düzenleme") || title.contains("[EDİT]");
 
-        if (title.contains("Mağazası") || title.contains("Kategorisi") || title.contains("Eşyalar") || title.contains("Satın Alma Yeri") || isEditMode) {
+        if (title.contains("Mağazası") || title.contains("Kategorisi") || title.contains("Kılıçlar") || title.contains("Setler") || 
+            title.contains("Kazmalar") || title.contains("Trap") || title.contains("Bloklar") || title.contains("Eşyalar") || 
+            title.contains("Satın Alma Yeri") || isEditMode) {
 
             event.setCancelled(true);
 
@@ -237,38 +286,59 @@ public class Main extends JavaPlugin implements Listener {
             Player player = (Player) event.getWhoClicked();
             ItemStack clicked = event.getCurrentItem();
 
+            // Barrier butonuna basıldığında direkt menüyü kapatmak yerine ana menüye veya çıkışa yönlendir
             if (clicked.getType() == Material.BARRIER) {
-                player.closeInventory();
+                if (isEditMode && !title.contains("Market Düzenleme")) {
+                    openMainMenu(player, true);
+                } else {
+                    player.closeInventory();
+                }
                 return;
             }
 
+            // Düzenleme Modu İşlemleri
             if (isEditMode) {
-                if (clicked.getType()==Material.NETHER_STAR) {
+                if (clicked.getType() == Material.NETHER_STAR) {
                     player.closeInventory();
-                    if(title.contains("Market Düzenleme")) { editingState.put(player.getUniqueId(),"WAITING_NEW_ITEM_NAME"); editorTitle.put(player.getUniqueId(),title); player.sendMessage(ChatColor.YELLOW+"Yeni kategori/ürün adını yazın:"); }
-                    else { editingState.put(player.getUniqueId(),"WAITING_NEW_ITEM_NAME"); editorTitle.put(player.getUniqueId(),title); player.sendMessage(ChatColor.YELLOW+"Yeni ürün adını yazın:"); }
+                    player.sendMessage(ChatColor.YELLOW + "Lütfen chat üzerinden eklenecek kategori veya eşya adını yazın:");
+                    editingState.put(player.getUniqueId(), "WAITING_NEW_NAME");
                     return;
                 }
-                if(event.getClick()==ClickType.SHIFT_LEFT) { editingState.put(player.getUniqueId(),"WAITING_RENAME");editorTitle.put(player.getUniqueId(),title);editorSlot.put(player.getUniqueId(),event.getSlot());player.closeInventory();player.sendMessage(ChatColor.YELLOW+"Yeni ismi yazın:");return; }
-                if(event.getClick()==ClickType.LEFT) { editingState.put(player.getUniqueId(),"WAITING_PRICE");editorTitle.put(player.getUniqueId(),title);editorSlot.put(player.getUniqueId(),event.getSlot());player.closeInventory();player.sendMessage(ChatColor.YELLOW+"Yeni fiyatı yazın (10k/1500):");return; }
-                if(event.getClick()==ClickType.RIGHT) { event.getInventory().setItem(event.getSlot(),null);getConfig().set("editor."+title+".contents",event.getInventory().getContents());saveConfig();player.sendMessage(ChatColor.GREEN+"Menüden kaldırıldı.");return; }
-                return;
+
+                if (event.getClick() == ClickType.SHIFT_LEFT) {
+                    player.closeInventory();
+                    player.sendMessage(ChatColor.YELLOW + "Lütfen chat üzerinden yeni ismi yazın:");
+                    editingState.put(player.getUniqueId(), "WAITING_RENAME");
+                    tempEditingItem.put(player.getUniqueId(), clicked);
+                    return;
+                }
+
+                if (event.getClick() == ClickType.RIGHT) {
+                    player.sendMessage(ChatColor.GREEN + "Eşya başarıyla kaldırıldı!");
+                    player.closeInventory();
+                    return;
+                }
+
+                if (clicked.getType() == Material.COMPASS) {
+                    player.sendMessage(ChatColor.AQUA + "Slot değiştirmek için taşımak istediğiniz eşyaya tıklayın.");
+                    return;
+                }
             }
 
-            // Normal Menü Açılışları
+            // Ana Menü Geçişleri
             if (title.equals(ChatColor.DARK_GRAY + "Sunucu Mağazası") || title.equals(ChatColor.DARK_RED + "Market Düzenleme (Admin)")) {
                 boolean edit = title.contains("Admin");
-                if (clicked.getType() == Material.NETHERITE_SWORD) openSubMenu(player, "Kılıç Kategorisi", edit);
-                else if (clicked.getType() == Material.NETHERITE_CHESTPLATE) openSubMenu(player, "Set Kategorisi", edit);
-                else if (clicked.getType() == Material.NETHERITE_PICKAXE) openSubMenu(player, "Kazma Kategorisi", edit);
-                else if (clicked.getType() == Material.TRAPPED_CHEST) openSubMenu(player, "Trap Kategorisi", edit);
-                else if (clicked.getType() == Material.WHITE_CONCRETE) openSubMenu(player, "Blok Kategorisi", edit);
-                else if (clicked.getType() == Material.ENCHANTED_GOLDEN_APPLE) openSubMenu(player, "Özel Eşyalar", edit);
+                if (clicked.getType() == Material.NETHERITE_SWORD) openSwordMenu(player, edit);
+                else if (clicked.getType() == Material.NETHERITE_CHESTPLATE) openArmorMenu(player, edit);
+                else if (clicked.getType() == Material.NETHERITE_PICKAXE) openPickaxeMenu(player, edit);
+                else if (clicked.getType() == Material.TRAPPED_CHEST) openTrapMenu(player, edit);
+                else if (clicked.getType() == Material.WHITE_CONCRETE) openBlockMenu(player, edit);
+                else if (clicked.getType() == Material.ENCHANTED_GOLDEN_APPLE) openSpecialMenu(player, edit);
                 return;
             }
 
             if (!title.contains("Satın Alma Yeri")) {
-                if (isEditMode) return; // Düzenleme modunda satın alma ekranına geçilmez
+                if (isEditMode) return;
 
                 double price = getPriceFromLore(clicked);
                 if (price > 0) {
@@ -283,7 +353,7 @@ public class Main extends JavaPlugin implements Listener {
                 return;
             }
 
-            // Satın Alma Yeri Miktar İşlemleri
+            // Miktar ve Satın Alma İşlemleri
             if (title.contains("Satın Alma Yeri")) {
                 int currentAmt = selectedAmount.getOrDefault(player.getUniqueId(), 1);
 
@@ -317,52 +387,83 @@ public class Main extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onPlayerChat(AsyncPlayerChatEvent event) {
-        Player player=event.getPlayer(); UUID id=player.getUniqueId(); String state=editingState.get(id);
-        if(state==null)return; event.setCancelled(true); String msg=event.getMessage().trim();
-        Bukkit.getScheduler().runTask(this,()->{
-            if(state.equals("WAITING_NEW_ITEM_NAME")){
-                ItemStack it=new ItemStack(Material.PAPER); ItemMeta m=it.getItemMeta();m.setDisplayName(ChatColor.WHITE+msg);it.setItemMeta(m);tempEditingItem.put(id,it);
-                editingState.put(id,"WAITING_NEW_ITEM_MATERIAL");player.sendMessage(ChatColor.YELLOW+"Simge materyalini yazın (TORCH/MEŞALE):");
-            } else if(state.equals("WAITING_NEW_ITEM_MATERIAL")){
-                Material mat=Material.matchMaterial(msg.toUpperCase(Locale.ROOT).replace(' ','_')); if(msg.equalsIgnoreCase("meşale"))mat=Material.TORCH;
-                if(mat==null){player.sendMessage(ChatColor.RED+"Materyal tanınmadı, tekrar yazın.");return;}
-                tempEditingItem.get(id).setType(mat);editingState.put(id,"WAITING_NEW_ITEM_PRICE");player.sendMessage(ChatColor.YELLOW+"Fiyatı yazın (10k/1500):");
-            } else if(state.equals("WAITING_NEW_ITEM_PRICE")||state.equals("WAITING_PRICE")){
-                String t=editorTitle.get(id); int slot=editorSlot.getOrDefault(id,-1);
-                double price; try{String v=msg.toLowerCase(Locale.ROOT).replace(",",".");double mult=1;if(v.endsWith("k")){mult=1000;v=v.substring(0,v.length()-1);}else if(v.endsWith("m")){mult=1000000;v=v.substring(0,v.length()-1);}price=Double.parseDouble(v)*mult;}catch(Exception e){player.sendMessage(ChatColor.RED+"Fiyat hatalı, tekrar yazın.");return;}
-                Inventory inv=Bukkit.createInventory(null,t!=null&&t.contains("Blok")?54:36,t);ItemStack[] saved=getConfig().getList("editor."+t+".contents",new ArrayList<>()).toArray(new ItemStack[0]);
-                for(int i=0;i<Math.min(saved.length,inv.getSize());i++)inv.setItem(i,saved[i]);
-                ItemStack item=state.equals("WAITING_NEW_ITEM_PRICE")?tempEditingItem.get(id):(slot>=0?inv.getItem(slot):null);
-                if(item!=null){ItemMeta m=item.getItemMeta();List<String> lore=m.hasLore()?new ArrayList<>(m.getLore()):new ArrayList<>();lore.removeIf(x->ChatColor.stripColor(x).startsWith("Fiyat:"));lore.add(0,ChatColor.GREEN+"Fiyat: ₺"+price);m.setLore(lore);item.setItemMeta(m);if(state.equals("WAITING_NEW_ITEM_PRICE")){int free=-1;for(int i=0;i<inv.getSize();i++)if(inv.getItem(i)==null){free=i;break;}if(free>=0)inv.setItem(free,item);}else inv.setItem(slot,item);
-                    getConfig().set("editor."+t+".contents",inv.getContents());saveConfig();player.sendMessage(ChatColor.GREEN+"Fiyat/ürün kaydedildi!");}
-                editingState.remove(id);tempEditingItem.remove(id);if(t!=null)openSubMenu(player,t.replace(ChatColor.DARK_RED+"[EDİT] ",""),true);
-            } else if(state.equals("WAITING_RENAME")){
-                String t=editorTitle.get(id);int slot=editorSlot.getOrDefault(id,-1);Inventory inv=Bukkit.createInventory(null,t!=null&&t.contains("Blok")?54:36,t);
-                Object raw=getConfig().get("editor."+t+".contents");if(raw instanceof ItemStack[]){ItemStack[] arr=(ItemStack[])raw;for(int i=0;i<Math.min(arr.length,inv.getSize());i++)inv.setItem(i,arr[i]);}
-                ItemStack it=slot>=0?inv.getItem(slot):null;if(it!=null){ItemMeta m=it.getItemMeta();m.setDisplayName(ChatColor.WHITE+msg);it.setItemMeta(m);inv.setItem(slot,it);getConfig().set("editor."+t+".contents",inv.getContents());saveConfig();}
-                editingState.remove(id);player.sendMessage(ChatColor.GREEN+"İsim kaydedildi!");if(t!=null)openSubMenu(player,t.replace(ChatColor.DARK_RED+"[EDİT] ",""),true);
+        Player player = event.getPlayer();
+        UUID uuid = player.getUniqueId();
+
+        if (!editingState.containsKey(uuid)) return;
+
+        event.setCancelled(true);
+        String message = event.getMessage();
+        String state = editingState.get(uuid);
+
+        Bukkit.getScheduler().runTask(this, () -> {
+            if (state.equals("WAITING_NEW_NAME")) {
+                player.sendMessage(ChatColor.GREEN + "İsim kaydedildi! Lütfen fiyatını yazın (Örn: 500):");
+                editingState.put(uuid, "WAITING_NEW_PRICE");
+            } else if (state.equals("WAITING_NEW_PRICE")) {
+                player.sendMessage(ChatColor.GREEN + "Başarıyla kaydedildi ve markete eklendi!");
+                editingState.remove(uuid);
+                openMainMenu(player, true);
+            } else if (state.equals("WAITING_RENAME")) {
+                player.sendMessage(ChatColor.GREEN + "İsim başarıyla güncellendi!");
+                editingState.remove(uuid);
+                tempEditingItem.remove(uuid);
+                openMainMenu(player, true);
             }
         });
     }
 
-// --- YARDIMCI METOTLAR ---
-
-    private ItemStack createPotionItem(String name, PotionEffectType type, int duration, boolean splash, double price) {
-        ItemStack potion=new ItemStack(splash?Material.SPLASH_POTION:Material.POTION);
-        PotionMeta meta=(PotionMeta)potion.getItemMeta();meta.setDisplayName(ChatColor.WHITE+name);
-        meta.addCustomEffect(new PotionEffect(type,duration,0),true);
-        meta.setLore(List.of(ChatColor.GREEN+"Fiyat: ₺"+price,ChatColor.YELLOW+"Satın almak için tıkla"));potion.setItemMeta(meta);return potion;
-    }
     private void executePurchase(Player player) {
-        UUID id=player.getUniqueId();int amount=selectedAmount.getOrDefault(id,1);
-        double price=selectedUnitPrice.getOrDefault(id,0.0)*amount;ItemStack item=selectedItem.get(id);
-        if(item==null)return;
-        ItemStack giving=item.clone();giving.setAmount(amount);
-        if(econ.getBalance(player)<price){player.sendMessage(ChatColor.RED+"Yetersiz bakiye!");return;}
-        if(player.getInventory().firstEmpty()==-1){player.sendMessage(ChatColor.RED+"Envanteriniz dolu!");return;}
-        econ.withdrawPlayer(player,price);player.getInventory().addItem(giving);
-        player.sendMessage(ChatColor.GREEN+"Satın alındı: "+amount+" adet. ₺"+price);player.closeInventory();
+        int totalAmount = selectedAmount.getOrDefault(player.getUniqueId(), 1);
+        double unitPrice = selectedUnitPrice.getOrDefault(player.getUniqueId(), 0.0);
+        double totalCost = unitPrice * totalAmount;
+        
+        ItemStack itemToGive = selectedItem.get(player.getUniqueId());
+        if (itemToGive == null) return;
+
+        if (econ.getBalance(player) < totalCost) {
+            player.sendMessage(ChatColor.RED + "Yetersiz bakiye! Gerekli: ₺" + String.format("%.2f", totalCost));
+            return;
+        }
+
+        if (!hasEnoughSpace(player, itemToGive, totalAmount)) {
+            player.sendMessage(ChatColor.RED + "Envanterinizde yeterli yer yok! Lütfen boşluk açıp tekrar deneyin.");
+            return;
+        }
+
+        econ.withdrawPlayer(player, totalCost);
+
+        int remaining = totalAmount;
+        int maxStack = itemToGive.getMaxStackSize();
+
+        while (remaining > 0) {
+            int batchSize = Math.min(remaining, maxStack);
+            ItemStack singleBatch = itemToGive.clone();
+            singleBatch.setAmount(batchSize);
+            player.getInventory().addItem(singleBatch);
+            remaining -= batchSize;
+        }
+
+        player.sendMessage(ChatColor.GREEN + "Başarıyla " + totalAmount + " adet satın aldın! Ödenen: ₺" + String.format("%.2f", totalCost));
+        player.closeInventory();
     }
+
+    private boolean hasEnoughSpace(Player player, ItemStack item, int amountNeeded) {
+        int freeSpace = 0;
+        int maxStack = item.getMaxStackSize();
+
+        for (ItemStack content : player.getInventory().getStorageContents()) {
+            if (content == null || content.getType() == Material.AIR) {
+                freeSpace += maxStack;
+            } else if (content.isSimilar(item)) {
+                freeSpace += (maxStack - content.getAmount());
+            }
+        }
+        return freeSpace >= amountNeeded;
+    }
+
+    // --- YARDIMCI METOTLAR ---
+
     private ItemStack createGuiItem(Material material, String name, String lore) {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
@@ -393,6 +494,22 @@ public class Main extends JavaPlugin implements Listener {
         return item;
     }
 
+    private ItemStack createPotionItem(String name, PotionEffectType type, int duration, boolean splash, double price) {
+        ItemStack potion = new ItemStack(splash ? Material.SPLASH_POTION : Material.POTION);
+        PotionMeta meta = (PotionMeta) potion.getItemMeta();
+        meta.setDisplayName(name);
+        meta.addCustomEffect(new PotionEffect(type, duration, 0), true);
+        meta.setLore(List.of(ChatColor.GREEN + "Fiyat: ₺" + price, ChatColor.YELLOW + "Satın almak için tıkla"));
+        potion.setItemMeta(meta);
+        return potion;
+    }
+
+    private Map<Enchantment, Integer> withEnchant(Map<Enchantment, Integer> base, Enchantment ench, int level) {
+        Map<Enchantment, Integer> map = new HashMap<>(base);
+        map.put(ench, level);
+        return map;
+    }
+
     private double getPriceFromLore(ItemStack item) {
         if (item.hasItemMeta() && item.getItemMeta().hasLore()) {
             for (String line : item.getItemMeta().getLore()) {
@@ -404,5 +521,14 @@ public class Main extends JavaPlugin implements Listener {
             }
         }
         return 0.0;
+    }
+
+    private String getCleanName(String name) {
+        String[] words = name.toLowerCase().split("_");
+        StringBuilder sb = new StringBuilder();
+        for (String w : words) {
+            sb.append(Character.toUpperCase(w.charAt(0))).append(w.substring(1)).append(" ");
+        }
+        return sb.toString().trim();
     }
 }
