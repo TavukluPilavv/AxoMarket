@@ -347,6 +347,22 @@ public class Main extends JavaPlugin implements Listener {
 
 // --- YARDIMCI METOTLAR ---
 
+    private ItemStack createPotionItem(String name, PotionEffectType type, int duration, boolean splash, double price) {
+        ItemStack potion=new ItemStack(splash?Material.SPLASH_POTION:Material.POTION);
+        PotionMeta meta=(PotionMeta)potion.getItemMeta();meta.setDisplayName(ChatColor.WHITE+name);
+        meta.addCustomEffect(new PotionEffect(type,duration,0),true);
+        meta.setLore(List.of(ChatColor.GREEN+"Fiyat: ₺"+price,ChatColor.YELLOW+"Satın almak için tıkla"));potion.setItemMeta(meta);return potion;
+    }
+    private void executePurchase(Player player) {
+        UUID id=player.getUniqueId();int amount=selectedAmount.getOrDefault(id,1);
+        double price=selectedUnitPrice.getOrDefault(id,0.0)*amount;ItemStack item=selectedItem.get(id);
+        if(item==null)return;
+        ItemStack giving=item.clone();giving.setAmount(amount);
+        if(econ.getBalance(player)<price){player.sendMessage(ChatColor.RED+"Yetersiz bakiye!");return;}
+        if(player.getInventory().firstEmpty()==-1){player.sendMessage(ChatColor.RED+"Envanteriniz dolu!");return;}
+        econ.withdrawPlayer(player,price);player.getInventory().addItem(giving);
+        player.sendMessage(ChatColor.GREEN+"Satın alındı: "+amount+" adet. ₺"+price);player.closeInventory();
+    }
     private ItemStack createGuiItem(Material material, String name, String lore) {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
