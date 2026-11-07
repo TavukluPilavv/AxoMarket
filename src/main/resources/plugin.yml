@@ -10,3 +10,8 @@ commands:
   marketedit:
     description: Market düzenleme menüsünü açar.
     permission: axomarket.admin
+
+permissions:
+  axomarket.admin:
+    description: Market düzenleme yetkisi
+    default: op
