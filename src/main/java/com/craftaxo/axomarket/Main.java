@@ -102,25 +102,79 @@ public class Main extends JavaPlugin implements Listener {
 
     public void openSubMenu(Player player, String categoryName, boolean editMode) {
         String titlePrefix = editMode ? ChatColor.DARK_RED + "[EDİT] " : "";
-        Inventory gui = Bukkit.createInventory(null, 36, titlePrefix + categoryName);
+        int size = categoryName.contains("Blok") ? 54 : 36;
+        Inventory gui = Bukkit.createInventory(null, size, titlePrefix + categoryName);
 
-        // Örnek içerikler
         if (categoryName.contains("Kılıç")) {
-            gui.setItem(10, createMarketItem(Material.NETHERITE_SWORD, ChatColor.RED + "Keskinlik V", 1.5, Map.of(Enchantment.DAMAGE_ALL, 5)));
-            gui.setItem(11, createMarketItem(Material.DIAMOND_SWORD, ChatColor.AQUA + "Elmas Kılıç (Keskinlik V)", 1.5, Map.of(Enchantment.DAMAGE_ALL, 5)));
-        } else {
+            gui.setItem(10, createMarketItem(Material.NETHERITE_SWORD, ChatColor.RED + "Keskinlik V Alevden Çehre II", 1.5, Map.of(Enchantment.DAMAGE_ALL, 5, Enchantment.FIRE_ASPECT, 2)));
+            gui.setItem(11, createMarketItem(Material.DIAMOND_SWORD, ChatColor.AQUA + "Keskinlik V Savurma I", 1.5, Map.of(Enchantment.DAMAGE_ALL, 5, Enchantment.KNOCKBACK, 1)));
+            gui.setItem(12, createMarketItem(Material.NETHERITE_SWORD, ChatColor.DARK_PURPLE + "Keskinlik VI Kırılmazlık III Alevden Çehre II", 40000.0, Map.of(Enchantment.DAMAGE_ALL, 6, Enchantment.DURABILITY, 3, Enchantment.FIRE_ASPECT, 2)));
+            gui.setItem(13, createMarketItem(Material.NETHERITE_SWORD, ChatColor.DARK_PURPLE + "Keskinlik VI Savurma I Kırılmazlık III", 40000.0, Map.of(Enchantment.DAMAGE_ALL, 6, Enchantment.KNOCKBACK, 1, Enchantment.DURABILITY, 3)));
+            gui.setItem(14, createMarketItem(Material.NETHERITE_SWORD, ChatColor.GOLD + "Keskinlik VII Kırılmazlık III Alevden Çehre II", 150000.0, Map.of(Enchantment.DAMAGE_ALL, 7, Enchantment.DURABILITY, 3, Enchantment.FIRE_ASPECT, 2)));
+        } else if (categoryName.contains("Set")) {
+            Map<Enchantment, Integer> ench = Map.of(Enchantment.PROTECTION_ENVIRONMENTAL, 4, Enchantment.DURABILITY, 3, Enchantment.MENDING, 1);
+            gui.setItem(10, createMarketItem(Material.NETHERITE_HELMET, "Koruma IV Kırılmazlık III Onarım", 1.5, ench));
+            gui.setItem(11, createMarketItem(Material.NETHERITE_CHESTPLATE, "Koruma IV Kırılmazlık III Onarım", 1.5, ench));
+            gui.setItem(12, createMarketItem(Material.NETHERITE_LEGGINGS, "Koruma IV Kırılmazlık III Onarım", 1.5, ench));
+            gui.setItem(13, createMarketItem(Material.NETHERITE_BOOTS, "Koruma IV Kırılmazlık III Onarım", 1.5, ench));
+            gui.setItem(15, createMarketItem(Material.NETHERITE_UPGRADE_SMITHING_TEMPLATE, "Netherite Yükseltme Şablonu", 1.5, null));
+        } else if (categoryName.contains("Kazma")) {
+            int[] levels = {5, 6, 7, 8, 9, 15, 25, 50};
+            double[] prices = {1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1000000.0};
+            for (int i = 0; i < levels.length; i++) {
+                int level = levels[i];
+                Map<Enchantment, Integer> ench = level == 50 ? Map.of(Enchantment.DIG_SPEED, level, Enchantment.DURABILITY, 3, Enchantment.LOOT_BONUS_BLOCKS, 3, Enchantment.MENDING, 1) : Map.of(Enchantment.DIG_SPEED, level, Enchantment.DURABILITY, 3, Enchantment.MENDING, 1);
+                String label = "Verimlilik " + (level == 50 ? "L" : level == 15 ? "XV" : level == 25 ? "XXV" : level) + " Kırılmazlık III" + (level == 50 ? " Servet III" : "") + " Onarım";
+                gui.setItem(9 + i, createMarketItem(Material.NETHERITE_PICKAXE, label, prices[i], ench));
+            }
+        } else if (categoryName.contains("Trap")) {
+            gui.setItem(10, createStackMarketItem(Material.OAK_TRAPDOOR, "Meşe Tuzak Kapısı", 1.5, 64));
+            gui.setItem(11, createStackMarketItem(Material.DARK_OAK_TRAPDOOR, "Koyu Meşe Tuzak Kapısı", 1.5, 64));
+            gui.setItem(13, createStackMarketItem(Material.STRING, "İp", 1.5, 64));
+            gui.setItem(14, createStackMarketItem(Material.REDSTONE, "Kızıltaş", 1.5, 64));
+            gui.setItem(15, createStackMarketItem(Material.PISTON, "Piston", 1.5, 64));
+            gui.setItem(16, createStackMarketItem(Material.STICKY_PISTON, "Yapışkan Piston", 1.5, 64));
+            gui.setItem(19, createStackMarketItem(Material.LEVER, "Şalter", 1.5, 32));
+            gui.setItem(20, createStackMarketItem(Material.WATER_BUCKET, "Su Kovası", 1.5, 1));
+        } else if (categoryName.contains("Blok")) {
+            Material[] mats = {Material.WHITE_CONCRETE, Material.ORANGE_CONCRETE, Material.MAGENTA_CONCRETE, Material.LIGHT_BLUE_CONCRETE, Material.YELLOW_CONCRETE, Material.LIME_CONCRETE, Material.PINK_CONCRETE, Material.GRAY_CONCRETE, Material.LIGHT_GRAY_CONCRETE, Material.CYAN_CONCRETE, Material.PURPLE_CONCRETE, Material.BLUE_CONCRETE, Material.BROWN_CONCRETE, Material.GREEN_CONCRETE, Material.RED_CONCRETE, Material.BLACK_CONCRETE, Material.OAK_LOG, Material.SPRUCE_LOG, Material.WHITE_WOOL, Material.RED_WOOL, Material.BLACK_WOOL, Material.BLUE_WOOL};
+            int slot = 0;
+            for (Material mat : mats) gui.setItem(slot++, createStackMarketItem(mat, getCleanName(mat.name()), 1.5, 64));
+        } else if (categoryName.contains("Özel")) {
             gui.setItem(10, createStackMarketItem(Material.GOLDEN_APPLE, "Altın Elma (1 Stak)", 130.0, 64));
-            gui.setItem(11, createMarketItem(Material.ELYTRA, "Elitra", 200000.0, Map.of(Enchantment.DURABILITY, 3, Enchantment.MENDING, 1)));
+            gui.setItem(11, createMarketItem(Material.ELYTRA, "Elitra (Kırılmazlık III Onarım)", 200000.0, Map.of(Enchantment.DURABILITY, 3, Enchantment.MENDING, 1)));
+            gui.setItem(12, createMarketItem(Material.TOTEM_OF_UNDYING, "Totem", 150000.0, null));
+            gui.setItem(13, createMarketItem(Material.SHIELD, "Kalkan", 1.5, null));
+            gui.setItem(14, createStackMarketItem(Material.FIREWORK_ROCKET, "Fişek", 1.5, 1));
+            gui.setItem(15, createStackMarketItem(Material.EXPERIENCE_BOTTLE, "XP Şişesi (1 Stak)", 1.5, 64));
+            gui.setItem(16, createMarketItem(Material.BOW, "Yay", 10.0, null));
+            gui.setItem(19, createPotionItem("Ateş Direnci 5 dk (İçilen)", PotionEffectType.FIRE_RESISTANCE, 5 * 60 * 20, false, 2000.0));
+            gui.setItem(20, createPotionItem("Ateş Direnci 5 dk (Atılan)", PotionEffectType.FIRE_RESISTANCE, 5 * 60 * 20, true, 2000.0));
+            gui.setItem(21, createPotionItem("Ateş Direnci 8 dk (İçilen)", PotionEffectType.FIRE_RESISTANCE, 8 * 60 * 20, false, 2000.0));
+            gui.setItem(22, createPotionArrowItem("Ateş Direnci Oku (32 adet)", 40.0, 32));
         }
 
-        if (editMode) {
-            gui.setItem(26, createGuiItem(Material.NETHER_STAR, ChatColor.GREEN + "+ Bu Kategoriye Ürün Ekle", ""));
-        }
-
-        gui.setItem(31, createGuiItem(Material.BARRIER, ChatColor.RED + "Kapat", ""));
+        if (editMode) gui.setItem(26, createGuiItem(Material.NETHER_STAR, ChatColor.GREEN + "+ Bu Kategoriye Ürün Ekle", ""));
+        gui.setItem(size == 54 ? 49 : 31, createGuiItem(Material.BARRIER, ChatColor.RED + "Kapat", ""));
         player.openInventory(gui);
     }
 
+    private ItemStack createPotionArrowItem(String name, double price, int amount) {
+        ItemStack arrows = new ItemStack(Material.TIPPED_ARROW, amount);
+        PotionMeta meta = (PotionMeta) arrows.getItemMeta();
+        meta.setDisplayName(name);
+        meta.addCustomEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 5 * 60 * 20, 0), true);
+        meta.setLore(List.of(ChatColor.GREEN + "Fiyat: ₺" + price, ChatColor.YELLOW + "Satın almak için tıkla"));
+        arrows.setItemMeta(meta);
+        return arrows;
+    }
+
+    private String getCleanName(String name) {
+        String[] words = name.toLowerCase(Locale.ROOT).split("_");
+        StringBuilder sb = new StringBuilder();
+        for (String word : words) sb.append(Character.toUpperCase(word.charAt(0))).append(word.substring(1)).append(" ");
+        return sb.toString().trim();
+    }
     // --- MİKTAR SEÇME VE SATIN ALMA MENÜSÜ ---
 
     public void openBuyMenu(Player player, ItemStack targetItem, double unitPrice) {
