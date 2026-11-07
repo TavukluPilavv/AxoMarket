@@ -34,7 +34,7 @@ public class Main extends JavaPlugin implements Listener {
 
     // Düzenleme (Edit) işlemleri için geçici veri tutucular
     private final Map<UUID, String> editingState = new HashMap<>();
-    private final Map<UUID, ItemStack> tempEditingItem = new HashMap<>();
+    private final Map<UUID, ItemStack> tempEditingItem = new HashMap<>();\n    private final Map<UUID, String> editorTitle = new HashMap<>();\n    private final Map<UUID, Integer> editorSlot = new HashMap<>();
 
     @Override
     public void onEnable() {
@@ -237,28 +237,17 @@ public class Main extends JavaPlugin implements Listener {
                 return;
             }
 
-            // Düzenleme Modu Tıklamaları
             if (isEditMode) {
-                if (clicked.getType() == Material.NETHER_STAR) {
+                if (clicked.getType()==Material.NETHER_STAR) {
                     player.closeInventory();
-                    player.sendMessage(ChatColor.YELLOW + "Lütfen chat üzerinden eklenecek öğe adını yazın:");
-                    editingState.put(player.getUniqueId(), "WAITING_NEW_ITEM_NAME");
+                    if(title.contains("Market Düzenleme")) { editingState.put(player.getUniqueId(),"WAITING_NEW_ITEM_NAME"); editorTitle.put(player.getUniqueId(),title); player.sendMessage(ChatColor.YELLOW+"Yeni kategori/ürün adını yazın:"); }
+                    else { editingState.put(player.getUniqueId(),"WAITING_NEW_ITEM_NAME"); editorTitle.put(player.getUniqueId(),title); player.sendMessage(ChatColor.YELLOW+"Yeni ürün adını yazın:"); }
                     return;
                 }
-
-                if (event.getClick() == ClickType.SHIFT_LEFT) {
-                    player.closeInventory();
-                    player.sendMessage(ChatColor.YELLOW + "Lütfen chat üzerinden yeni ismi yazın:");
-                    editingState.put(player.getUniqueId(), "WAITING_RENAME");
-                    tempEditingItem.put(player.getUniqueId(), clicked);
-                    return;
-                }
-
-                if (event.getClick() == ClickType.RIGHT) {
-                    player.sendMessage(ChatColor.GREEN + "Eşya başarıyla kaldırıldı!");
-                    player.closeInventory();
-                    return;
-                }
+                if(event.getClick()==ClickType.SHIFT_LEFT) { editingState.put(player.getUniqueId(),"WAITING_RENAME");editorTitle.put(player.getUniqueId(),title);editorSlot.put(player.getUniqueId(),event.getSlot());player.closeInventory();player.sendMessage(ChatColor.YELLOW+"Yeni ismi yazın:");return; }
+                if(event.getClick()==ClickType.LEFT) { editingState.put(player.getUniqueId(),"WAITING_PRICE");editorTitle.put(player.getUniqueId(),title);editorSlot.put(player.getUniqueId(),event.getSlot());player.closeInventory();player.sendMessage(ChatColor.YELLOW+"Yeni fiyatı yazın (10k/1500):");return; }
+                if(event.getClick()==ClickType.RIGHT) { event.getInventory().setItem(event.getSlot(),null);getConfig().set("editor."+title.replace(ChatColor.DARK_RED+"[EDİT] ","")+".contents",event.getInventory().getContents());saveConfig();player.sendMessage(ChatColor.GREEN+"Menüden kaldırıldı.");return; }
+                return;
             }
 
             // Normal Menü Açılışları
