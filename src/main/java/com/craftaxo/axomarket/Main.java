@@ -157,7 +157,7 @@ public class Main extends JavaPlugin implements Listener {
         gui.setItem(23, createGuiItem(Material.LIME_STAINED_GLASS_PANE, ChatColor.GREEN + "64 Yap", ""));
 
         ItemStack displayItem = target.clone();
-        displayItem.setAmount(Math.min(Math.max(amount, 1), 64));
+        displayItem.setAmount(Math.min(Math.max(target.getAmount() * amount, 1), 64));
         gui.setItem(13, displayItem);
 
         gui.setItem(40, createGuiItem(Material.BARRIER, ChatColor.RED + "Kapat", ""));
@@ -315,17 +315,28 @@ public class Main extends JavaPlugin implements Listener {
 
         econ.withdrawPlayer(player, totalCost);
 
-        int remaining = totalAmount;
-        int maxStack = itemToGive.getMaxStackSize();
+        int packSize = Math.max(1, itemToGive.getAmount());
+        int actualAmount = totalAmount * packSize;
+        ItemStack itemTemplate = itemToGive.clone();
+        itemTemplate.setAmount(1);
 
+        if (!hasEnoughSpace(player, itemTemplate, actualAmount)) {
+            player.sendMessage(ChatColor.RED + "Envanteriniz dolu! Eşyalar envantere sığmıyor.");
+            return;
+        }
+
+        econ.withdrawPlayer(player, totalCost);
+        int remaining = actualAmount;
+        int maxStack = itemTemplate.getMaxStackSize();
         while (remaining > 0) {
             int batchSize = Math.min(remaining, maxStack);
-            ItemStack singleBatch = itemToGive.clone();
-            singleBatch.setAmount(batchSize);
-            player.getInventory().addItem(singleBatch);
+            ItemStack stack = itemTemplate.clone();
+            stack.setAmount(batchSize);
+            player.getInventory().addItem(stack);
             remaining -= batchSize;
         }
 
+        player.sendMessage(ChatColor.GREEN + "Başarıyla satın aldın: " + actualAmount + " adet! Ödenen: ₺" + String.format("%.2f", totalCost));
         player.sendMessage(ChatColor.GREEN + "Başarıyla " + totalAmount + " adet satın aldın! Ödenen: ₺" + String.format("%.2f", totalCost));
         player.closeInventory();
     }
