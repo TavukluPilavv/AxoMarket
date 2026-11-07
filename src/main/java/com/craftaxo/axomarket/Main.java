@@ -78,6 +78,11 @@ public class Main extends JavaPlugin implements Listener {
         return false;
     }
 
+    private void loadEditorContents(String key, Inventory inv) {
+        Object raw=getConfig().get("editor."+key+".contents");
+        if(raw instanceof ItemStack[]){ItemStack[] arr=(ItemStack[])raw;for(int i=0;i<Math.min(arr.length,inv.getSize());i++)inv.setItem(i,arr[i]);}
+    }
+
     // --- MENÜLER ---
 
     public void openMainMenu(Player player, boolean editMode) {
@@ -154,7 +159,7 @@ public class Main extends JavaPlugin implements Listener {
             gui.setItem(22, createPotionArrowItem("Ateş Direnci Oku (32 adet)", 40.0, 32));
         }
 
-        if (editMode) gui.setItem(26, createGuiItem(Material.NETHER_STAR, ChatColor.GREEN + "+ Bu Kategoriye Ürün Ekle", ""));
+        loadEditorContents(titlePrefix + categoryName, gui);\n        if (editMode) gui.setItem(26, createGuiItem(Material.NETHER_STAR, ChatColor.GREEN + "+ Bu Kategoriye Ürün Ekle", ""));
         gui.setItem(size == 54 ? 49 : 31, createGuiItem(Material.BARRIER, ChatColor.RED + "Kapat", ""));
         player.openInventory(gui);
     }
@@ -246,7 +251,7 @@ public class Main extends JavaPlugin implements Listener {
                 }
                 if(event.getClick()==ClickType.SHIFT_LEFT) { editingState.put(player.getUniqueId(),"WAITING_RENAME");editorTitle.put(player.getUniqueId(),title);editorSlot.put(player.getUniqueId(),event.getSlot());player.closeInventory();player.sendMessage(ChatColor.YELLOW+"Yeni ismi yazın:");return; }
                 if(event.getClick()==ClickType.LEFT) { editingState.put(player.getUniqueId(),"WAITING_PRICE");editorTitle.put(player.getUniqueId(),title);editorSlot.put(player.getUniqueId(),event.getSlot());player.closeInventory();player.sendMessage(ChatColor.YELLOW+"Yeni fiyatı yazın (10k/1500):");return; }
-                if(event.getClick()==ClickType.RIGHT) { event.getInventory().setItem(event.getSlot(),null);getConfig().set("editor."+title.replace(ChatColor.DARK_RED+"[EDİT] ","")+".contents",event.getInventory().getContents());saveConfig();player.sendMessage(ChatColor.GREEN+"Menüden kaldırıldı.");return; }
+                if(event.getClick()==ClickType.RIGHT) { event.getInventory().setItem(event.getSlot(),null);getConfig().set("editor."+title+".contents",event.getInventory().getContents());saveConfig();player.sendMessage(ChatColor.GREEN+"Menüden kaldırıldı.");return; }
                 return;
             }
 
